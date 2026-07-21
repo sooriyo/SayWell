@@ -41,6 +41,7 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     private func setupKeyboard() {
+        print("🎹 [SETUP] Setting up keyboard")
         // Fully transparent — system provides the keyboard chrome/blur.
         view.backgroundColor = .clear
         view.isOpaque = false
@@ -51,6 +52,7 @@ final class KeyboardViewController: UIInputViewController {
         keyboard.delegate = self
         view.addSubview(keyboard)
         keyboardView = keyboard
+        print("🎹 [SETUP] Keyboard view added: \(type(of: keyboard))")
 
         // Priority < required so the system can still negotiate with the host.
         let height = view.heightAnchor.constraint(equalToConstant: SayWellKeyboardView.preferredHeight)

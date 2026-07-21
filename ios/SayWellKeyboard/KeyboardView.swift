@@ -69,6 +69,7 @@ final class SayWellKeyboardView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        print("🎹 [INIT] SayWellKeyboardView initialized")
         // Native keyboard is translucent glass — no solid fill.
         backgroundColor = .clear
         isOpaque = false
