@@ -72,11 +72,13 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Native-style uppercase keys, SF Symbols, system blue return key
 - User confirmed this look as **"perfect"** — avoid re-adding glass/blur/borders unless asked
 
-### Current focus (Jul 21)
-- **Next ship target:** App Store v1.0 — privacy, legal, and compliance (**Tier 0** in [FUTURE_PLANS.md](FUTURE_PLANS.md))
-- **Cost + architecture optimizations done:** Expanded phrases 11→52, refactored to dictionary-based system (105 words + 56 patterns), 63% token savings
+### Current focus (Jul 21 — v1.0 launch prep)
+- **Build status:** ✅ iOS app builds successfully (Debug config, simulator)
+- **Backend status:** ✅ Live at `https://saywell-backend.saywell.workers.dev` (currently v1.0 with 52 phrases; v2.0 dictionary system ready to deploy)
+- **Next immediate:** Deploy dictionary-based phrase system (105 words + 56 patterns) → 63% token savings
+- **Ship target:** Privacy/legal/compliance hardening (**Tier 0** in [FUTURE_PLANS.md](FUTURE_PLANS.md)) before App Store submission
 - **Not before release:** tone selector, alternatives, and other Tier 1 UX (v1.1)
-- **Data flows agents must know:** typed phrases → Cloudflare Worker → instant lookup (65% hit) or Gemini (35% cache miss); `X-Device-Id` for rate limits; miss logs include raw text (harden before launch)
+- **Data flow (post-deploy):** typed phrases → Cloudflare Worker → instant lookup (65%+ hit, 2-tier: phrase then dictionary composition) or Gemini (35% cache miss)
 
 ## iOS commit history (high level)
 
@@ -221,3 +223,13 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **Composition enabled:** Lookup checks exact phrase first, then falls back to word-by-word composition
 - **Future-ready:** Enables space-less word handling ("karamuda" → "karamu da" composition)
 - Committed as `b6d6da9`. All tests pass (14/14).
+
+### 2026-07-21 — v1.0 launch readiness checkpoint
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 1:53PM
+- **✅ Build status:** iOS app builds successfully (xcodegen + Xcode, Debug/Simulator)
+- **✅ API live:** Backend deployed and responding at `https://saywell-backend.saywell.workers.dev` (current: v1.0 with 52 phrases; v2.0 dictionary system staged)
+- **✅ Core features done:** Translation (keyboard + app), caching (3-tier), suggestions, history, device ID tracking, rate limiting
+- **✅ Optimization done:** 63% token cost reduction, dictionary architecture ready
+- **✅ Bug fixes done:** 7 critical fixes (date decoding, cache eviction, timeouts, semantics, API bloat, deletion count, punctuation)
+- **⏳ Ready for:** Deploy v2.0 backend (dictionary phrases), then focus on Tier 0 (privacy/legal/compliance)
+- **Not before ship:** Feature work (tone, alternatives), only compliance/privacy required for v1.0
