@@ -1,6 +1,16 @@
 # SayWell — project log
 
 > **For agents:** Read this file first when starting a new session. Append a dated entry at the bottom when you finish meaningful work (features, fixes, deploys, restructures). Keep entries short: what changed, why, and anything the next agent must know.
+>
+> **Every new entry must include:**
+> - **Agent** — your real agent identity, not a generic label. Examples: `Cursor Auto`, `Cursor Composer`, `Claude Sonnet` (include the platform when applicable)
+> - **Updated** — date + time in 12-hour form, e.g. `Jul 21, 2026, 7:30PM` (use the user's local timezone when known; otherwise UTC and note it)
+>
+> Example header:
+> ```markdown
+> ### 2026-07-21 — Short title
+> **Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:56AM
+> ```
 
 ## Product
 
@@ -99,9 +109,44 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Committed & pushed as `842f578`
 
 ### 2026-07-21 — Workspace reorganized
+**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:37AM
 - Moved backend from `~/Desktop/saywell-backend` into workspace
 - Restructured to standard `ios/` + `backend/` layout under `SayWell/`
 - Root README = workspace index; `ios/README.md` = iOS docs
 - `backend/` added to iOS `.gitignore` (nested separate repo)
 - Xcode project regenerated from `ios/` — build verified
 - **Status:** committed locally as part of workspace reorg (push when ready)
+
+### 2026-07-21 — Suggestion bar loading UX
+**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:47AM
+- Replaced spinner with pulsing-dot animation + friendly copy during translate
+- Loading shows `"phrase" → English` (short phrases) or `Translating your Singlish`
+- Idle hint, clearer Full Access prompt, friendlier error messages
+- Crossfade + subtle spring when translation appears
+- **Do not** revert to bare `UIActivityIndicatorView` unless asked
+
+### 2026-07-21 — Host app UX polish
+**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:53AM
+- Welcome card, loading card with pulsing dots + phrase preview (mirrors keyboard tone)
+- Share + Copy on results; "Translate another" reset; retry on errors
+- Haptic feedback on success/error/copy; auto-scroll to result
+- Collapsible keyboard setup section; friendlier source badges (Instant / AI)
+- New `SayWell/Views/TranslationComponents.swift`
+
+### 2026-07-21 — Floating navigation bar
+**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:56AM
+- Glass-style floating nav pinned via `safeAreaInset` — title, subtitle, quick actions
+- Actions: clear input, scroll to keyboard setup, open Settings
+- Scroll-aware shadow; hero tagline kept below the bar
+- New `SayWell/Views/FloatingNavBar.swift`
+
+### 2026-07-21 — Backend improvements (token cost + speed)
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 10:08AM
+- **Built-in common phrases** (`src/commonPhrases.{json,ts}`) — 11 curated high-frequency phrases seeded from proven few-shot examples. Zero-token instant translations; response carries `source:"builtin"`.
+- **Fuzzy matching in normalize.ts** — edit-distance-1 typo matching against canonical tokens (length ≥4); ambiguity-safe. Reduces cache misses from single-character typos.
+- **Prompt trim** — removed 5 duplicate few-shot pairs (reschedule, thawa poddak, aiyo openers). ~5% reduction in inline prompt cost for uncached calls.
+- **CACHE_VERSION v1→v2** — normalizer changes invalidate old KV keys; first request per phrase pays one fresh Gemini call, then re-caches under v2.
+- **New tests** — `test/commonPhrases.test.ts` (lookup, count) + fuzzy-match cases in `test/normalize.test.ts`.
+- **Cost reduction strategy documented** in README: three-tier (builtin → cache → Gemini), manual miss-log mining for continuous improvement.
+- **API contract note:** `/translate` response `source` field now includes `"builtin"` (additive, no breaking changes).
+- Committed as `b94063d`.
