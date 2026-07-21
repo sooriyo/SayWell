@@ -11,6 +11,9 @@ final class KeyboardViewController: UIInputViewController {
         // Let Auto Layout own the keyboard height so we don't leave a tall empty
         // gray band covering the host app (the circled overlay).
         inputView?.allowsSelfSizing = true
+        // Kill any system-provided opaque fill so only our clear glass shows.
+        inputView?.backgroundColor = .clear
+        inputView?.isOpaque = false
 
         setupKeyboard()
         bindSuggester()
@@ -36,10 +39,9 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     private func setupKeyboard() {
-        view.backgroundColor = KeyboardPalette.background
-        view.isOpaque = true
-        // Avoid a second tinted layer from the system input chrome.
-        view.tintColor = KeyboardPalette.label
+        // Fully transparent — system provides the keyboard chrome/blur.
+        view.backgroundColor = .clear
+        view.isOpaque = false
 
         let keyboard = SayWellKeyboardView(frame: .zero)
         keyboard.translatesAutoresizingMaskIntoConstraints = false
@@ -55,7 +57,6 @@ final class KeyboardViewController: UIInputViewController {
         NSLayoutConstraint.activate([
             keyboard.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             keyboard.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            keyboard.topAnchor.constraint(equalTo: view.topAnchor),
             keyboard.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             height,
         ])

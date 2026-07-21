@@ -54,8 +54,9 @@ final class SayWellKeyboardView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = KeyboardPalette.background
-        isOpaque = true
+        // Native keyboard is translucent glass — no solid fill.
+        backgroundColor = .clear
+        isOpaque = false
         buildChrome()
         rebuildKeys()
     }
@@ -71,7 +72,6 @@ final class SayWellKeyboardView: UIView {
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        backgroundColor = KeyboardPalette.background
         rebuildKeys()
         suggestionBar.refreshColors()
     }
@@ -130,7 +130,6 @@ final class SayWellKeyboardView: UIView {
         addSubview(rowsStack)
 
         NSLayoutConstraint.activate([
-            // Compact predictive strip — no tall empty overlay above the keys.
             suggestionBar.topAnchor.constraint(equalTo: topAnchor),
             suggestionBar.leadingAnchor.constraint(equalTo: leadingAnchor),
             suggestionBar.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -139,7 +138,6 @@ final class SayWellKeyboardView: UIView {
             rowsStack.topAnchor.constraint(equalTo: suggestionBar.bottomAnchor, constant: topKeysInset),
             rowsStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: sideInset),
             rowsStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -sideInset),
-            // Pin keys to the bottom so leftover height can't become empty gray.
             rowsStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -bottomInset),
         ])
     }
@@ -313,67 +311,45 @@ final class SayWellKeyboardView: UIView {
     }
 }
 
-// MARK: - Native-style 3-slot predictive bar
+// MARK: - Predictive strip (no plate — floats on system keyboard chrome)
 
 final class SuggestionBarView: UIView {
     var onTapAccept: (() -> Void)?
 
-    private let leftLabel = UILabel()
-    private let centerLabel = UILabel()
-    private let rightLabel = UILabel()
+    private let label = UILabel()
     private let spinner = UIActivityIndicatorView(style: .medium)
-    private let divider1 = UIView()
-    private let divider2 = UIView()
     private var canAccept = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = KeyboardPalette.background
-        isOpaque = true
+        backgroundColor = .clear
+        isOpaque = false
 
-        for label in [leftLabel, centerLabel, rightLabel] {
-            label.font = .systemFont(ofSize: 17, weight: .regular)
-            label.textAlignment = .center
-            label.textColor = KeyboardPalette.label
-            label.lineBreakMode = .byTruncatingTail
-            label.adjustsFontSizeToFitWidth = true
-            label.minimumScaleFactor = 0.7
-        }
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.textAlignment = .center
+        label.textColor = KeyboardPalette.label
+        label.lineBreakMode = .byTruncatingTail
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.7
 
         spinner.transform = CGAffineTransform(scaleX: 0.65, y: 0.65)
         spinner.hidesWhenStopped = true
         spinner.color = KeyboardPalette.secondaryLabel
 
-        divider1.backgroundColor = KeyboardPalette.separator
-        divider2.backgroundColor = KeyboardPalette.separator
-
-        let leftSlot = slotView(containing: leftLabel)
-        let centerSlot = slotView(containing: centerLabel, spinner: spinner)
-        let rightSlot = slotView(containing: rightLabel)
-
-        let stack = UIStackView(arrangedSubviews: [leftSlot, divider1, centerSlot, divider2, rightSlot])
+        let stack = UIStackView(arrangedSubviews: [spinner, label])
         stack.axis = .horizontal
-        stack.alignment = .fill
-        stack.distribution = .fill
+        stack.alignment = .center
+        stack.spacing = 6
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
-
-            divider1.widthAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale),
-            divider2.widthAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale),
-
-            leftSlot.widthAnchor.constraint(equalTo: centerSlot.widthAnchor),
-            rightSlot.widthAnchor.constraint(equalTo: centerSlot.widthAnchor),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
 
-        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        addGestureRecognizer(tap)
-
+        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap)))
         apply(.idle)
     }
 
@@ -383,74 +359,46 @@ final class SuggestionBarView: UIView {
     }
 
     func refreshColors() {
-        backgroundColor = KeyboardPalette.background
-        divider1.backgroundColor = KeyboardPalette.separator
-        divider2.backgroundColor = KeyboardPalette.separator
+        backgroundColor = .clear
         spinner.color = KeyboardPalette.secondaryLabel
     }
 
     func apply(_ state: TranslationSuggester.SuggestionState) {
         canAccept = false
-        leftLabel.text = nil
-        rightLabel.text = nil
-        centerLabel.textColor = KeyboardPalette.label
-        centerLabel.font = .systemFont(ofSize: 17, weight: .regular)
+        label.textColor = KeyboardPalette.label
+        label.font = .systemFont(ofSize: 17, weight: .regular)
 
         switch state {
         case .idle:
             spinner.stopAnimating()
-            centerLabel.text = nil
+            label.text = nil
 
         case .needsFullAccess:
             spinner.stopAnimating()
-            centerLabel.text = "Allow Full Access"
-            centerLabel.textColor = KeyboardPalette.secondaryLabel
-            centerLabel.font = .systemFont(ofSize: 15, weight: .regular)
+            label.text = "Allow Full Access"
+            label.textColor = KeyboardPalette.secondaryLabel
+            label.font = .systemFont(ofSize: 15, weight: .regular)
 
         case .loading:
             spinner.startAnimating()
-            centerLabel.text = nil
+            label.text = nil
 
         case .ready(_, let translation):
             spinner.stopAnimating()
             canAccept = true
-            centerLabel.text = translation.translation
-            centerLabel.font = .systemFont(ofSize: 17, weight: .regular)
+            label.text = translation.translation
 
         case .failed(_, let message):
             spinner.stopAnimating()
-            centerLabel.text = message
-            centerLabel.textColor = KeyboardPalette.secondaryLabel
-            centerLabel.font = .systemFont(ofSize: 14, weight: .regular)
+            label.text = message
+            label.textColor = KeyboardPalette.secondaryLabel
+            label.font = .systemFont(ofSize: 14, weight: .regular)
         }
     }
 
     @objc private func handleTap() {
         guard canAccept else { return }
         onTapAccept?()
-    }
-
-    private func slotView(containing label: UILabel, spinner: UIActivityIndicatorView? = nil) -> UIView {
-        let container = UIView()
-        label.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(label)
-
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 6),
-            label.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -6),
-            label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-        ])
-
-        if let spinner {
-            spinner.translatesAutoresizingMaskIntoConstraints = false
-            container.addSubview(spinner)
-            NSLayoutConstraint.activate([
-                spinner.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-                spinner.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            ])
-        }
-
-        return container
     }
 }
 
@@ -492,11 +440,7 @@ final class KeyButton: UIButton {
         setTitleColor(style == .returnKey ? .white : KeyboardPalette.label, for: .normal)
         backgroundColor = styleBackground
         layer.cornerRadius = 4.5
-        layer.masksToBounds = false
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = traitCollection.userInterfaceStyle == .dark ? 0.4 : 0.25
-        layer.shadowRadius = 0
-        layer.shadowOffset = CGSize(width: 0, height: 1)
+        layer.masksToBounds = true
 
         addTarget(self, action: #selector(touchDown), for: .touchDown)
         addTarget(self, action: #selector(touchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel])
@@ -532,30 +476,19 @@ final class KeyButton: UIButton {
 // MARK: - Palette
 
 enum KeyboardPalette {
-    /// Match the host app chrome (Messages composer) so the top seam disappears.
-    static var background: UIColor {
-        UIColor { traits in
-            if traits.userInterfaceStyle == .dark {
-                return UIColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1)
-            }
-            // Same white as the Messages input bar in the red-box area.
-            return .systemBackground
-        }
-    }
-
     static var key: UIColor {
         UIColor { traits in
             traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.42, green: 0.42, blue: 0.43, alpha: 1)
-                : .white
+                ? UIColor(white: 1, alpha: 0.28)
+                : UIColor(white: 1, alpha: 0.92)
         }
     }
 
     static var actionKey: UIColor {
         UIColor { traits in
             traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.28, green: 0.28, blue: 0.29, alpha: 1)
-                : UIColor(red: 0.72, green: 0.72, blue: 0.74, alpha: 1)
+                ? UIColor(white: 1, alpha: 0.18)
+                : UIColor(white: 1, alpha: 0.55)
         }
     }
 
@@ -568,12 +501,4 @@ enum KeyboardPalette {
     }
 
     static var secondaryLabel: UIColor { .secondaryLabel }
-
-    static var separator: UIColor {
-        UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor.white.withAlphaComponent(0.18)
-                : UIColor.black.withAlphaComponent(0.12)
-        }
-    }
 }
