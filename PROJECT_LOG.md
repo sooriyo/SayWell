@@ -72,13 +72,14 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Native-style uppercase keys, SF Symbols, system blue return key
 - User confirmed this look as **"perfect"** — avoid re-adding glass/blur/borders unless asked
 
-### Current focus (Jul 21 — v1.0 launch prep)
+### Current focus (Jul 21 — v1.0 launch prep: Tier 0 Privacy/Compliance)
 - **Build status:** ✅ iOS app builds successfully (Debug config, simulator)
 - **Backend status:** ✅ v2.0 live with dictionary system (105 words + 56 patterns, 65%+ hit rate, zero Gemini on common patterns)
-- **Cost optimization:** ✅ Deployed (63% token savings, 2-tier phrase+dictionary lookup)
-- **Ship target:** ⏳ Privacy/legal/compliance hardening (**Tier 0** in [FUTURE_PLANS.md](FUTURE_PLANS.md)) before App Store submission
+- **Cost optimization:** ✅ Deployed (63% token savings)
+- **Privacy hardening:** ✅ Raw text logs removed, CORS restricted (dev.saywell.app only), privacy documents created
+- **Ship target:** ⏳ Finalize privacy/legal docs + implement iOS Privacy Manifest before App Store submission
 - **Not before release:** tone selector, alternatives, and other Tier 1 UX (v1.1)
-- **Data flow (live):** typed phrases → Cloudflare Worker → instant 2-tier lookup (exact phrase OR word composition from dictionary) → KV cache → Gemini (rare miss)
+- **Data flow (live):** typed phrases → Cloudflare Worker → 2-tier lookup (phrase or dictionary composition) → KV cache → Gemini (rare miss). No raw text logged.
 
 ## iOS commit history (high level)
 
@@ -241,3 +242,12 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **✅ Hit rate:** 65%+ instant (builtin source), 35% Gemini cache hits, <5% Gemini misses
 - **✅ Token cost:** 63% reduction realized in production (52k→19k tokens/day at 100 req/day)
 - **Next:** Focus on Tier 0 privacy/compliance hardening for App Store submission
+
+### 2026-07-21 — Tier 0 Privacy/Compliance: hardening + legal documents
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 2:00PM
+- **✅ Backend hardening:** Removed raw user input from translation miss logs (privacy fix: prevents PII exposure)
+- **✅ CORS restrictions:** Changed from "*" to "https://saywell.app,https://app.saywell.app,http://localhost:3000" (prevents API abuse)
+- **✅ Privacy Policy:** Created comprehensive policy covering data collection, retention, third parties, user rights
+- **✅ Terms of Service:** Created ToS covering license, fair use, limitations, rate limiting, third-party services
+- **✅ iOS Privacy Manifest:** Created guidance for PrivacyInfo.xcprivacy + App Store Data & Privacy form
+- **⏳ Next:** Implement iOS Privacy Manifest in Xcode, finalize contact email + jurisdiction, submit to App Store
