@@ -205,3 +205,13 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **Result:** fewer requests while typing, better UX, lower mobile data usage
 - Committed as `64e67fd` (fix) + `c2c944d` (debounce).
 - Added **Current focus** section here for agent handoff
+
+### 2026-07-21 — Fix 5 bugs: date decoding, cache, timeouts, timestamps, deletion
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 12:50PM
+- **#1 JSONDecoder missing .iso8601 strategy** — CommonPhrasesStore.fetchRemoteMetadata() now decodes ISO 8601 dates; metadata sync was silently failing
+- **#2 Memory cache eviction broken** — TranslationSuggester cleared all 64 entries on overflow instead of LRU evicting one; now removes only oldest entry, preserving frequent phrases
+- **#3 No network timeout on common phrases sync** — URLSession now configured with 10s request + 15s resource timeout (was unbounded, could hang app startup)
+- **#4 Hardcoded metadata timestamps not synced** — Backend handlers required dual manual updates; refactored to share `getCommonPhrasesMetadata()` (single source of truth for version, lastUpdated, count, size)
+- **#5 Keyboard deletion count mismatch** — TranslationSuggester.currentPhrase() returned trimmed phrase but insertTranslation() deleted based on trimmed count, leaving punctuation. Now KeyboardPhrase tracks actual character count separately
+- iOS: builds successfully, keyboard & host app working. Backend: typecheck + 14/14 tests pass
+- Committed iOS as `162c49b`, backend as `bb7c337`
