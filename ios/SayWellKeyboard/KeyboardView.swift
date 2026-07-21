@@ -396,7 +396,8 @@ final class SayWellKeyboardView: UIView {
             guard let self, let button else { return }
             self.showKeyPreview(for: button)
         }
-        button.onEndPreview = { [weak self] in
+        button.onEndPreview = { [weak self, weak button] in
+            button?.setPreviewVisible(false)
             self?.keyPreview.dismiss()
         }
     }
@@ -404,6 +405,7 @@ final class SayWellKeyboardView: UIView {
     private func showKeyPreview(for button: KeyButton) {
         guard let title = button.title(for: .normal), !title.isEmpty else { return }
         keyPreview.present(text: title, sourceView: button, in: self)
+        button.setPreviewVisible(true)
     }
 }
 
@@ -411,39 +413,33 @@ final class SayWellKeyboardView: UIView {
 
 /// Three pulsing dots — friendlier than a system spinner in the suggestion strip.
 final class AnimatedEllipsisView: UIView {
-    private let pulseCircle = UIView()
-    private let pulseRing = UIView()
+    private let dotStack = UIStackView()
+    private let dots: [UIView] = (0..<3).map { _ in UIView() }
     private var isAnimating = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        // Inner pulsing circle (the "brain" thinking)
-        pulseCircle.translatesAutoresizingMaskIntoConstraints = false
-        pulseCircle.backgroundColor = KeyboardPalette.secondaryLabel
-        pulseCircle.layer.cornerRadius = 4
-        addSubview(pulseCircle)
+        dotStack.axis = .horizontal
+        dotStack.spacing = 4
+        dotStack.alignment = .center
+        dotStack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(dotStack)
+
+        for dot in dots {
+            dot.translatesAutoresizingMaskIntoConstraints = false
+            dot.backgroundColor = KeyboardPalette.secondaryLabel
+            dot.layer.cornerRadius = 3
+            dotStack.addArrangedSubview(dot)
+            NSLayoutConstraint.activate([
+                dot.widthAnchor.constraint(equalToConstant: 6),
+                dot.heightAnchor.constraint(equalToConstant: 6),
+            ])
+        }
 
         NSLayoutConstraint.activate([
-            pulseCircle.widthAnchor.constraint(equalToConstant: 8),
-            pulseCircle.heightAnchor.constraint(equalToConstant: 8),
-            pulseCircle.centerXAnchor.constraint(equalTo: centerXAnchor),
-            pulseCircle.centerYAnchor.constraint(equalTo: centerYAnchor),
-        ])
-
-        // Outer ring (expands with pulse)
-        pulseRing.translatesAutoresizingMaskIntoConstraints = false
-        pulseRing.layer.borderColor = KeyboardPalette.secondaryLabel.cgColor
-        pulseRing.layer.borderWidth = 1.2
-        pulseRing.layer.cornerRadius = 10
-        pulseRing.alpha = 0
-        addSubview(pulseRing)
-
-        NSLayoutConstraint.activate([
-            pulseRing.widthAnchor.constraint(equalToConstant: 20),
-            pulseRing.heightAnchor.constraint(equalToConstant: 20),
-            pulseRing.centerXAnchor.constraint(equalTo: centerXAnchor),
-            pulseRing.centerYAnchor.constraint(equalTo: centerYAnchor),
+            dotStack.centerXAnchor.constraint(equalTo: centerXAnchor),
+            dotStack.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
 
         stopAnimating()
@@ -455,48 +451,49 @@ final class AnimatedEllipsisView: UIView {
     }
 
     func refreshColors() {
-        pulseCircle.backgroundColor = KeyboardPalette.secondaryLabel
-        pulseRing.layer.borderColor = KeyboardPalette.secondaryLabel.cgColor
+        dots.forEach { $0.backgroundColor = KeyboardPalette.secondaryLabel }
     }
 
     func startAnimating() {
         guard !isAnimating else { return }
         isAnimating = true
-        startPulse()
+        animateDot(at: 0)
     }
 
     func stopAnimating() {
         isAnimating = false
-        layer.removeAllAnimations()
-        pulseCircle.layer.removeAllAnimations()
-        pulseRing.layer.removeAllAnimations()
-        pulseCircle.alpha = 1
-        pulseRing.alpha = 0
+        dots.forEach {
+            $0.layer.removeAllAnimations()
+            $0.alpha = 0.35
+            $0.transform = .identity
+        }
     }
 
-    private func startPulse() {
+    private func animateDot(at index: Int) {
         guard isAnimating else { return }
+        let dot = dots[index]
 
-        // Outer ring expands and fades
         UIView.animate(
-            withDuration: 1.2,
+            withDuration: 0.32,
             delay: 0,
-            options: [.curveEaseOut, .allowUserInteraction, .repeat]
-        ) { [weak self] in
-            self?.pulseRing.transform = CGAffineTransform(scaleX: 1.8, y: 1.8)
-            self?.pulseRing.alpha = 0
+            options: [.curveEaseInOut, .allowUserInteraction]
+        ) {
+            dot.alpha = 1
+            dot.transform = CGAffineTransform(translationX: 0, y: -2)
+        } completion: { [weak self] finished in
+            guard let self, finished, self.isAnimating else { return }
+            UIView.animate(
+                withDuration: 0.32,
+                delay: 0,
+                options: [.curveEaseInOut, .allowUserInteraction]
+            ) {
+                dot.alpha = 0.35
+                dot.transform = .identity
+            } completion: { [weak self] finished in
+                guard let self, finished, self.isAnimating else { return }
+                self.animateDot(at: (index + 1) % self.dots.count)
+            }
         }
-
-        // Inner circle pulsates brightness
-        let pulseAnimation = CABasicAnimation(keyPath: "opacity")
-        pulseAnimation.fromValue = 0.6
-        pulseAnimation.toValue = 1.0
-        pulseAnimation.duration = 0.6
-        pulseAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        pulseAnimation.autoreverses = true
-        pulseAnimation.repeatCount = .infinity
-
-        pulseCircle.layer.add(pulseAnimation, forKey: "pulse")
     }
 }
 
@@ -562,32 +559,50 @@ final class SuggestionBarView: UIView {
 
     private func apply(_ state: TranslationSuggester.SuggestionState, animated: Bool) {
         let stateChanged = state != displayedState
+        let previousState = displayedState
         displayedState = state
 
         let shouldAnimate = animated && stateChanged && state != .idle
 
         guard shouldAnimate else {
             render(state)
+            label.alpha = 1
+            label.transform = .identity
             return
         }
 
-        UIView.transition(
-            with: contentStack,
-            duration: 0.22,
-            options: [.transitionCrossDissolve, .allowUserInteraction]
-        ) {
-            self.render(state)
-        }
+        let wasShowingEllipsis: Bool
+        if case .loading = previousState { wasShowingEllipsis = true } else { wasShowingEllipsis = false }
+        let willShowEllipsis: Bool
+        if case .loading = state { willShowEllipsis = true } else { willShowEllipsis = false }
 
-        if case .ready = state {
-            label.transform = CGAffineTransform(scaleX: 0.97, y: 0.97)
+        label.alpha = 0
+        label.transform = CGAffineTransform(translationX: 0, y: 3)
+
+        UIView.animate(
+            withDuration: 0.18,
+            delay: 0,
+            options: [.curveEaseOut, .allowUserInteraction]
+        ) {
+            if wasShowingEllipsis {
+                self.ellipsis.alpha = 0
+            }
+        } completion: { _ in
+            self.render(state)
+            self.ellipsis.alpha = willShowEllipsis ? 0 : 1
+
             UIView.animate(
-                withDuration: 0.28,
+                withDuration: 0.26,
                 delay: 0,
-                usingSpringWithDamping: 0.82,
-                initialSpringVelocity: 0.4
+                usingSpringWithDamping: 0.86,
+                initialSpringVelocity: 0.35,
+                options: [.allowUserInteraction]
             ) {
+                self.label.alpha = 1
                 self.label.transform = .identity
+                if willShowEllipsis {
+                    self.ellipsis.alpha = 1
+                }
             }
         }
     }
@@ -689,7 +704,7 @@ final class KeyButton: UIButton {
     }
 
     func setSymbol(systemName: String, pointSize: CGFloat = 17) {
-        let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
+        let config = UIImage.SymbolConfiguration(pointSize: pointSize, weight: .medium)
         setImage(UIImage(systemName: systemName, withConfiguration: config), for: .normal)
         setTitle(nil, for: .normal)
         tintColor = KeyboardPalette.label
@@ -700,11 +715,21 @@ final class KeyButton: UIButton {
         backgroundColor = highlighted ? KeyboardPalette.key : KeyboardPalette.actionKey
     }
 
+    func setPreviewVisible(_ visible: Bool) {
+        UIView.animate(withDuration: visible ? 0.05 : 0.04, delay: 0, options: [.curveEaseOut, .allowUserInteraction]) {
+            self.titleLabel?.alpha = visible ? 0 : 1
+            self.backgroundColor = visible ? .clear : self.styleBackground
+        }
+    }
+
     private func configures() {
-        titleLabel?.font = .systemFont(ofSize: style == .letter ? 22.5 : 16, weight: .light)
+        titleLabel?.font = .systemFont(
+            ofSize: style == .letter ? 22 : 16,
+            weight: style == .letter ? .regular : .medium
+        )
         setTitleColor(style == .returnKey ? .white : KeyboardPalette.label, for: .normal)
         backgroundColor = styleBackground
-        layer.cornerRadius = 4.5
+        layer.cornerRadius = 5.5
         layer.masksToBounds = true
 
         addTarget(self, action: #selector(touchDown), for: .touchDown)
@@ -724,7 +749,9 @@ final class KeyButton: UIButton {
 
     @objc private func touchDown() {
         switch style {
-        case .letter, .space:
+        case .letter:
+            break // preview bubble handles pressed visuals
+        case .space:
             backgroundColor = KeyboardPalette.actionKey
         case .action:
             backgroundColor = KeyboardPalette.key
@@ -742,9 +769,16 @@ final class KeyButton: UIButton {
             onEndPreview?()
         }
     }
+
+    // Expand touch area to catch touches in gaps between keys (like native keyboard)
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let inset: CGFloat = -4 // Expand hit area by 4pt on all sides
+        let expandedBounds = bounds.insetBy(dx: inset, dy: inset)
+        return expandedBounds.contains(point)
+    }
 }
 
-// MARK: - Key preview (native-style pop-up above pressed keys)
+// MARK: - Key preview
 
 private final class KeyPreviewView: UIView {
     private let plate = UIView()
@@ -755,12 +789,12 @@ private final class KeyPreviewView: UIView {
         isUserInteractionEnabled = false
         isHidden = true
         alpha = 0
+        clipsToBounds = false
 
         plate.layer.cornerRadius = 6
-        plate.layer.masksToBounds = true
         plate.translatesAutoresizingMaskIntoConstraints = false
 
-        label.font = .systemFont(ofSize: 40, weight: .light)
+        label.font = .systemFont(ofSize: 36, weight: .regular)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
 
@@ -773,16 +807,14 @@ private final class KeyPreviewView: UIView {
             plate.topAnchor.constraint(equalTo: topAnchor),
             plate.bottomAnchor.constraint(equalTo: bottomAnchor),
 
-            label.leadingAnchor.constraint(equalTo: plate.leadingAnchor, constant: 4),
-            label.trailingAnchor.constraint(equalTo: plate.trailingAnchor, constant: -4),
-            label.topAnchor.constraint(equalTo: plate.topAnchor, constant: 2),
-            label.bottomAnchor.constraint(equalTo: plate.bottomAnchor, constant: -2),
+            label.centerXAnchor.constraint(equalTo: plate.centerXAnchor),
+            label.topAnchor.constraint(equalTo: plate.topAnchor, constant: 4),
         ])
 
         layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.18
-        layer.shadowRadius = 6
-        layer.shadowOffset = CGSize(width: 0, height: 2)
+        layer.shadowOpacity = 0.25
+        layer.shadowRadius = 4
+        layer.shadowOffset = CGSize(width: 0, height: 1)
 
         refreshColors()
     }
@@ -793,7 +825,7 @@ private final class KeyPreviewView: UIView {
     }
 
     func refreshColors() {
-        plate.backgroundColor = KeyboardPalette.key
+        plate.backgroundColor = KeyboardPalette.previewKey
         label.textColor = KeyboardPalette.label
     }
 
@@ -801,30 +833,36 @@ private final class KeyPreviewView: UIView {
         label.text = text
 
         let sourceFrame = sourceView.convert(sourceView.bounds, to: container)
-        let width = max(sourceFrame.width * 1.18, 52)
-        let height: CGFloat = 56
+        let width = max(sourceFrame.width * 1.3, 44)
+        let extensionAbove: CGFloat = 26
+        let height = sourceFrame.height + extensionAbove
         let horizontalInset: CGFloat = 3
 
         var x = sourceFrame.midX - width / 2
         x = max(horizontalInset, min(x, container.bounds.width - width - horizontalInset))
 
-        // Overlap the key slightly so the preview feels attached, like the system keyboard.
-        let y = sourceFrame.minY - height + 12
+        let y = sourceFrame.minY - extensionAbove
 
         frame = CGRect(x: x, y: y, width: width, height: height)
         container.bringSubviewToFront(self)
         isHidden = false
 
-        if alpha < 1 {
-            transform = CGAffineTransform(scaleX: 0.88, y: 0.88).translatedBy(x: 0, y: 6)
+        if alpha < 1 || transform != .identity {
+            transform = CGAffineTransform(scaleX: 0.82, y: 0.82).translatedBy(x: 0, y: 8)
+            alpha = 0
             UIView.animate(
-                withDuration: 0.07,
+                withDuration: 0.09,
                 delay: 0,
-                options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState]
+                usingSpringWithDamping: 0.72,
+                initialSpringVelocity: 0.8,
+                options: [.allowUserInteraction, .beginFromCurrentState]
             ) {
                 self.alpha = 1
                 self.transform = .identity
             }
+        } else {
+            alpha = 1
+            transform = .identity
         }
     }
 
@@ -844,12 +882,12 @@ private final class KeyPreviewView: UIView {
         }
 
         UIView.animate(
-            withDuration: 0.05,
+            withDuration: 0.06,
             delay: 0,
             options: [.curveEaseIn, .allowUserInteraction, .beginFromCurrentState]
         ) {
             self.alpha = 0
-            self.transform = CGAffineTransform(scaleX: 0.92, y: 0.92).translatedBy(x: 0, y: 4)
+            self.transform = CGAffineTransform(scaleX: 0.9, y: 0.9).translatedBy(x: 0, y: 3)
         } completion: { _ in
             self.isHidden = true
             self.transform = .identity
@@ -864,14 +902,23 @@ enum KeyboardPalette {
         UIColor { traits in
             traits.userInterfaceStyle == .dark
                 ? UIColor(white: 1, alpha: 0.28)
-                : UIColor(white: 1, alpha: 0.92)
+                : UIColor(white: 1, alpha: 0.25)
+        }
+    }
+
+    /// Pressed letter key + preview bubble — lighter and more opaque than resting keys.
+    static var previewKey: UIColor {
+        UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.57, green: 0.57, blue: 0.59, alpha: 0.95)
+                : UIColor(white: 1, alpha: 1.0)
         }
     }
 
     static var actionKey: UIColor {
         UIColor { traits in
             traits.userInterfaceStyle == .dark
-                ? UIColor(white: 1, alpha: 0.18)
+                ? UIColor(white: 1, alpha: 0.20)
                 : UIColor(white: 1, alpha: 0.55)
         }
     }
