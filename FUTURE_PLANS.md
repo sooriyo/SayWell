@@ -123,7 +123,7 @@ Return 2–3 variants instead of one (e.g. natural / shorter / more polite).
 
 #### 3. Translation history & favorites
 
-**Shipped (partial):** recent translations in host app (last 8, tap to re-translate). Still to do: favorites, search, keyboard chips.
+**Shipped (partial):** recent archivedranslations in host app (last 8, tap to re-translate). Still to do: favorites, search, keyboard chips.
 
 **Host app**
 
