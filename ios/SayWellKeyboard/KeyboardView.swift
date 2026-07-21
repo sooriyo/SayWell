@@ -411,37 +411,39 @@ final class SayWellKeyboardView: UIView {
 
 /// Three pulsing dots — friendlier than a system spinner in the suggestion strip.
 final class AnimatedEllipsisView: UIView {
-    private let stack = UIStackView()
-    private let dotViews: [UIView]
+    private let pulseCircle = UIView()
+    private let pulseRing = UIView()
     private var isAnimating = false
 
     override init(frame: CGRect) {
-        dotViews = (0..<3).map { _ in
-            let dot = UIView()
-            dot.translatesAutoresizingMaskIntoConstraints = false
-            dot.backgroundColor = KeyboardPalette.secondaryLabel
-            dot.layer.cornerRadius = 2
-            NSLayoutConstraint.activate([
-                dot.widthAnchor.constraint(equalToConstant: 4),
-                dot.heightAnchor.constraint(equalToConstant: 4),
-            ])
-            return dot
-        }
-
         super.init(frame: frame)
 
-        stack.axis = .horizontal
-        stack.spacing = 3
-        stack.alignment = .center
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        dotViews.forEach { stack.addArrangedSubview($0) }
-        addSubview(stack)
+        // Inner pulsing circle (the "brain" thinking)
+        pulseCircle.translatesAutoresizingMaskIntoConstraints = false
+        pulseCircle.backgroundColor = KeyboardPalette.secondaryLabel
+        pulseCircle.layer.cornerRadius = 4
+        addSubview(pulseCircle)
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+            pulseCircle.widthAnchor.constraint(equalToConstant: 8),
+            pulseCircle.heightAnchor.constraint(equalToConstant: 8),
+            pulseCircle.centerXAnchor.constraint(equalTo: centerXAnchor),
+            pulseCircle.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+
+        // Outer ring (expands with pulse)
+        pulseRing.translatesAutoresizingMaskIntoConstraints = false
+        pulseRing.layer.borderColor = KeyboardPalette.secondaryLabel.cgColor
+        pulseRing.layer.borderWidth = 1.2
+        pulseRing.layer.cornerRadius = 10
+        pulseRing.alpha = 0
+        addSubview(pulseRing)
+
+        NSLayoutConstraint.activate([
+            pulseRing.widthAnchor.constraint(equalToConstant: 20),
+            pulseRing.heightAnchor.constraint(equalToConstant: 20),
+            pulseRing.centerXAnchor.constraint(equalTo: centerXAnchor),
+            pulseRing.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
 
         stopAnimating()
@@ -453,44 +455,48 @@ final class AnimatedEllipsisView: UIView {
     }
 
     func refreshColors() {
-        dotViews.forEach { $0.backgroundColor = KeyboardPalette.secondaryLabel }
+        pulseCircle.backgroundColor = KeyboardPalette.secondaryLabel
+        pulseRing.layer.borderColor = KeyboardPalette.secondaryLabel.cgColor
     }
 
     func startAnimating() {
         guard !isAnimating else { return }
         isAnimating = true
-        pulseCycle()
+        startPulse()
     }
 
     func stopAnimating() {
         isAnimating = false
         layer.removeAllAnimations()
-        dotViews.forEach { $0.layer.removeAllAnimations() }
-        dotViews.forEach { $0.alpha = 0.35 }
+        pulseCircle.layer.removeAllAnimations()
+        pulseRing.layer.removeAllAnimations()
+        pulseCircle.alpha = 1
+        pulseRing.alpha = 0
     }
 
-    private func pulseCycle() {
+    private func startPulse() {
         guard isAnimating else { return }
 
-        for (index, dot) in dotViews.enumerated() {
-            dot.alpha = 0.35
-            UIView.animate(
-                withDuration: 0.38,
-                delay: Double(index) * 0.14,
-                options: [.curveEaseInOut, .allowUserInteraction]
-            ) {
-                dot.alpha = 1
-            } completion: { [weak self, weak dot] finished in
-                guard finished, let self, let dot, self.isAnimating else { return }
-                UIView.animate(withDuration: 0.38, delay: 0.05, options: [.curveEaseInOut]) {
-                    dot.alpha = 0.35
-                }
-            }
+        // Outer ring expands and fades
+        UIView.animate(
+            withDuration: 1.2,
+            delay: 0,
+            options: [.curveEaseOut, .allowUserInteraction, .repeat]
+        ) { [weak self] in
+            self?.pulseRing.transform = CGAffineTransform(scaleX: 1.8, y: 1.8)
+            self?.pulseRing.alpha = 0
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { [weak self] in
-            self?.pulseCycle()
-        }
+        // Inner circle pulsates brightness
+        let pulseAnimation = CABasicAnimation(keyPath: "opacity")
+        pulseAnimation.fromValue = 0.6
+        pulseAnimation.toValue = 1.0
+        pulseAnimation.duration = 0.6
+        pulseAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        pulseAnimation.autoreverses = true
+        pulseAnimation.repeatCount = .infinity
+
+        pulseCircle.layer.add(pulseAnimation, forKey: "pulse")
     }
 }
 
