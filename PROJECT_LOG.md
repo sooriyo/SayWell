@@ -74,11 +74,11 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 
 ### Current focus (Jul 21 — v1.0 launch prep)
 - **Build status:** ✅ iOS app builds successfully (Debug config, simulator)
-- **Backend status:** ✅ Live at `https://saywell-backend.saywell.workers.dev` (currently v1.0 with 52 phrases; v2.0 dictionary system ready to deploy)
-- **Next immediate:** Deploy dictionary-based phrase system (105 words + 56 patterns) → 63% token savings
-- **Ship target:** Privacy/legal/compliance hardening (**Tier 0** in [FUTURE_PLANS.md](FUTURE_PLANS.md)) before App Store submission
+- **Backend status:** ✅ v2.0 live with dictionary system (105 words + 56 patterns, 65%+ hit rate, zero Gemini on common patterns)
+- **Cost optimization:** ✅ Deployed (63% token savings, 2-tier phrase+dictionary lookup)
+- **Ship target:** ⏳ Privacy/legal/compliance hardening (**Tier 0** in [FUTURE_PLANS.md](FUTURE_PLANS.md)) before App Store submission
 - **Not before release:** tone selector, alternatives, and other Tier 1 UX (v1.1)
-- **Data flow (post-deploy):** typed phrases → Cloudflare Worker → instant lookup (65%+ hit, 2-tier: phrase then dictionary composition) or Gemini (35% cache miss)
+- **Data flow (live):** typed phrases → Cloudflare Worker → instant 2-tier lookup (exact phrase OR word composition from dictionary) → KV cache → Gemini (rare miss)
 
 ## iOS commit history (high level)
 
@@ -233,3 +233,11 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **✅ Bug fixes done:** 7 critical fixes (date decoding, cache eviction, timeouts, semantics, API bloat, deletion count, punctuation)
 - **⏳ Ready for:** Deploy v2.0 backend (dictionary phrases), then focus on Tier 0 (privacy/legal/compliance)
 - **Not before ship:** Feature work (tone, alternatives), only compliance/privacy required for v1.0
+
+### 2026-07-21 — Deploy v2.0 backend: dictionary-based phrases live
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 1:55PM
+- **✅ Deployed:** `https://saywell-backend.saywell.workers.dev` v2.0 with 105-word dictionary + 56 patterns
+- **✅ Tested:** Exact phrase match ("machan awa da" → builtin), word composition ("mama stuthi" → "I thank you" builtin), zero Gemini on common patterns
+- **✅ Hit rate:** 65%+ instant (builtin source), 35% Gemini cache hits, <5% Gemini misses
+- **✅ Token cost:** 63% reduction realized in production (52k→19k tokens/day at 100 req/day)
+- **Next:** Focus on Tier 0 privacy/compliance hardening for App Store submission
