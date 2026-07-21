@@ -74,7 +74,7 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 
 ### Current focus (Jul 21)
 - **Next ship target:** App Store v1.0 — privacy, legal, and compliance (**Tier 0** in [FUTURE_PLANS.md](FUTURE_PLANS.md))
-- **Cost optimization done:** Expanded commonPhrases from 11 → 52 (63% token savings)
+- **Cost + architecture optimizations done:** Expanded phrases 11→52, refactored to dictionary-based system (105 words + 56 patterns), 63% token savings
 - **Not before release:** tone selector, alternatives, and other Tier 1 UX (v1.1)
 - **Data flows agents must know:** typed phrases → Cloudflare Worker → instant lookup (65% hit) or Gemini (35% cache miss); `X-Device-Id` for rate limits; miss logs include raw text (harden before launch)
 
@@ -212,3 +212,12 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **Maintenance:** Added `_categories` object for easy review and future mining of logs
 - Backend version bumped to v1.1, metadata updated with new count. All tests pass
 - Committed as `e56d4fa`
+
+### 2026-07-21 — Refactor: dictionary-based phrase system (eliminates duplication)
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 1:50PM
+- **Two-tier architecture:** 105-word dictionary + 56 composite phrase patterns (was: 51 full phrases)
+- **Duplication eliminated:** "machan" defined once (was in 4+ phrases), "eka" once (was in 8+ phrases), etc.
+- **Scalability improved:** Adding new phrases = add to dictionary/patterns, not duplicate words
+- **Composition enabled:** Lookup checks exact phrase first, then falls back to word-by-word composition
+- **Future-ready:** Enables space-less word handling ("karamuda" → "karamu da" composition)
+- Committed as `b6d6da9`. All tests pass (14/14).
