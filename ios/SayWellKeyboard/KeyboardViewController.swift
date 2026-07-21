@@ -117,6 +117,18 @@ final class KeyboardViewController: UIInputViewController {
                 textDocumentProxy.deleteBackward()
             }
         }
+
+        // Add space before translation if there's existing text and it doesn't end with whitespace
+        let beforeCursor = textDocumentProxy.documentContextBeforeInput ?? ""
+        let needsSpace = !beforeCursor.isEmpty
+            && !beforeCursor.hasSuffix(" ")
+            && !beforeCursor.hasSuffix("\n")
+            && !beforeCursor.hasSuffix("\t")
+
+        if needsSpace {
+            textDocumentProxy.insertText(" ")
+        }
+
         textDocumentProxy.insertText(english)
         suggester.reset()
     }

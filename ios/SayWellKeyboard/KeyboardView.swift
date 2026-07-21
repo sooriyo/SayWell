@@ -500,7 +500,6 @@ final class SuggestionBarView: UIView {
     private let contentStack = UIStackView()
     private let ellipsis = AnimatedEllipsisView()
     private let label = UILabel()
-    private let sourceLabel = UILabel()
     private var canAccept = false
     private var displayedState: TranslationSuggester.SuggestionState = .idle
 
@@ -517,24 +516,15 @@ final class SuggestionBarView: UIView {
         label.minimumScaleFactor = 0.7
         label.numberOfLines = 1
 
-        sourceLabel.font = .systemFont(ofSize: 10, weight: .semibold)
-        sourceLabel.textAlignment = .center
-        sourceLabel.textColor = KeyboardPalette.label.withAlphaComponent(0.6)
-        sourceLabel.adjustsFontSizeToFitWidth = true
-        sourceLabel.minimumScaleFactor = 0.8
-        sourceLabel.numberOfLines = 1
-        sourceLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
-
         ellipsis.setContentHuggingPriority(.required, for: .horizontal)
         ellipsis.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         contentStack.axis = .horizontal
         contentStack.alignment = .center
-        contentStack.spacing = 6
+        contentStack.spacing = 8
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentStack.addArrangedSubview(ellipsis)
         contentStack.addArrangedSubview(label)
-        contentStack.addArrangedSubview(sourceLabel)
         addSubview(contentStack)
 
         NSLayoutConstraint.activate([
@@ -602,8 +592,6 @@ final class SuggestionBarView: UIView {
         label.font = .systemFont(ofSize: 17, weight: .regular)
         ellipsis.isHidden = true
         ellipsis.stopAnimating()
-        sourceLabel.text = ""
-        sourceLabel.isHidden = true
 
         switch state {
         case .idle:
@@ -626,8 +614,6 @@ final class SuggestionBarView: UIView {
         case .ready(_, _, let translation):
             canAccept = true
             label.text = translation.translation
-            sourceLabel.text = translation.source.label
-            sourceLabel.isHidden = false
 
         case .failed(_, _, let message):
             label.text = Self.friendlyFailureMessage(message)
