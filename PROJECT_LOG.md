@@ -152,6 +152,17 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **API contract note:** `/translate` response `source` field now includes `"builtin"` (additive, no breaking changes).
 - Committed as `b94063d`.
 
+### 2026-07-21 — On-device personal phrase cache (iOS)
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 10:45AM
+- **LocalPhraseCache.swift** (`ios/Shared/`) — App-Group-backed, frequency-ranked, persisted store of the top ~100 phrases this user translates often. Survives keyboard extension purges (LFU eviction when >100 entries).
+- **Keyboard integration** (TranslationSuggester) — check persisted cache after in-memory cache, before network; record all successful translations for ranking.
+- **Host app integration** (TranslationViewModel) — check persisted cache before API call; expose count + clear control.
+- **UI** (ContentView) — minimal "Cached phrases: N" row with Clear button (shown when count > 0).
+- **TranslationResponse made Codable** (was Decodable) so cache entries can encode/decode it directly.
+- Zero backend or entitlements changes — reuses existing App Group (`group.dev.saywell.app`) setup.
+- Build verified (Debug configuration on iOS Simulator succeeds).
+- Committed as `9aa5b14`.
+
 ### 2026-07-21 — Future plans roadmap doc
 **Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 10:19AM
 - Added `FUTURE_PLANS.md` — tiered UX/feature roadmap for agents (tone, alternatives, history, keyboard polish, etc.)
