@@ -2,14 +2,19 @@
 
 > **For agents:** Read this file first when starting a new session. Append a dated entry at the bottom when you finish meaningful work (features, fixes, deploys, restructures). Keep entries short: what changed, why, and anything the next agent must know.
 >
+> **When adding new entries:**
+> - Include your real agent identity (e.g., `Claude Haiku 4.5`, `Cursor Auto`), date + time
+> - Keep entries brief — what changed, why, key gotchas for next agent
+> - **Before appending, review the log:** if any entries are stale/obsolete (features shipped and logged, workarounds applied, debugging notes no longer relevant), archive them to [PROJECT_LOG_ARCHIVE.md](PROJECT_LOG_ARCHIVE.md). Goal: keep active log ≤200 lines, focused on **current ship target + today's work**.
+>
 > **Every new entry must include:**
-> - **Agent** — your real agent identity, not a generic label. Examples: `Cursor Auto`, `Cursor Composer`, `Claude Sonnet` (include the platform when applicable)
+> - **Agent** — your real agent identity, not a generic label. Examples: `Cursor Auto`, `Cursor Composer`, `Claude Haiku 4.5` (include the platform when applicable)
 > - **Updated** — date + time in 12-hour form, e.g. `Jul 21, 2026, 7:30PM` (use the user's local timezone when known; otherwise UTC and note it)
 >
 > Example header:
 > ```markdown
 > ### 2026-07-21 — Short title
-> **Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:56AM
+> **Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 9:56AM
 > ```
 
 ## Product
