@@ -9,7 +9,7 @@ final class TranslationSuggester {
     private var lastRequested = ""
     private var memoryCache: [String: TranslationResponse] = [:]
 
-    private let debounceNanoseconds: UInt64 = 700_000_000
+    private let debounceNanoseconds: UInt64 = 1_000_000_000  // 1 second — wait until user pauses
     private let minChars = 2
 
     var onUpdate: ((SuggestionState) -> Void)?
