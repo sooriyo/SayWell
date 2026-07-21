@@ -104,7 +104,9 @@ final class SayWellKeyboardView: UIView {
         func findClosestButton(in view: UIView) {
             for subview in view.subviews {
                 if let button = subview as? KeyButton {
-                    let distance = distanceFromPointToRect(point, button.frame)
+                    // Convert button's center from its coordinate system to self's
+                    let buttonCenterInSelf = convert(button.bounds.center, from: button)
+                    let distance = hypot(point.x - buttonCenterInSelf.x, point.y - buttonCenterInSelf.y)
                     if distance < closestDistance {
                         closestDistance = distance
                         closestButton = button
@@ -117,11 +119,6 @@ final class SayWellKeyboardView: UIView {
 
         findClosestButton(in: self)
         return closestButton
-    }
-
-    private func distanceFromPointToRect(_ point: CGPoint, _ rect: CGRect) -> CGFloat {
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        return hypot(point.x - center.x, point.y - center.y)
     }
 
     func apply(suggestion: TranslationSuggester.SuggestionState) {
