@@ -30,6 +30,7 @@ final class SayWellKeyboardView: UIView {
 
     private let suggestionBar = SuggestionBarView()
     private let rowsStack = UIStackView()
+    private let keyPreview = KeyPreviewView()
     private var shiftEnabled = false
     private var shiftLocked = false
     private var layout: KeyboardLayout = .letters
@@ -71,11 +72,13 @@ final class SayWellKeyboardView: UIView {
         // Native keyboard is translucent glass — no solid fill.
         backgroundColor = .clear
         isOpaque = false
+        clipsToBounds = false
         buildChrome()
         rebuildKeys()
         registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: SayWellKeyboardView, _) in
             self.rebuildKeys()
             self.suggestionBar.refreshColors()
+            self.keyPreview.refreshColors()
         }
     }
 
@@ -154,9 +157,11 @@ final class SayWellKeyboardView: UIView {
         rowsStack.alignment = .fill
         rowsStack.distribution = .fill
         rowsStack.translatesAutoresizingMaskIntoConstraints = false
+        rowsStack.clipsToBounds = false
 
         addSubview(suggestionBar)
         addSubview(rowsStack)
+        addSubview(keyPreview)
 
         NSLayoutConstraint.activate([
             suggestionBar.topAnchor.constraint(equalTo: topAnchor),
@@ -172,6 +177,7 @@ final class SayWellKeyboardView: UIView {
     }
 
     private func rebuildKeys() {
+        keyPreview.dismiss(animated: false)
         rowsStack.arrangedSubviews.forEach {
             rowsStack.removeArrangedSubview($0)
             $0.removeFromSuperview()
@@ -208,6 +214,7 @@ final class SayWellKeyboardView: UIView {
             let insert = insertValue(for: raw)
             let button = KeyButton(style: .letter)
             button.setTitle(displayTitle(for: raw), for: .normal)
+            wireKeyPreview(for: button)
             button.addAction(UIAction { [weak self] _ in
                 guard let self else { return }
                 self.delegate?.keyboardView(self, didTapKey: .character(insert))
@@ -382,6 +389,21 @@ final class SayWellKeyboardView: UIView {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.widthAnchor.constraint(equalToConstant: width).isActive = true
         return view
+    }
+
+    private func wireKeyPreview(for button: KeyButton) {
+        button.onBeginPreview = { [weak self, weak button] in
+            guard let self, let button else { return }
+            self.showKeyPreview(for: button)
+        }
+        button.onEndPreview = { [weak self] in
+            self?.keyPreview.dismiss()
+        }
+    }
+
+    private func showKeyPreview(for button: KeyButton) {
+        guard let title = button.title(for: .normal), !title.isEmpty else { return }
+        keyPreview.present(text: title, sourceView: button, in: self)
     }
 }
 
@@ -660,6 +682,8 @@ final class KeyButton: UIButton {
 
     private let style: Style
     private var isActionHighlighted = false
+    var onBeginPreview: (() -> Void)?
+    var onEndPreview: (() -> Void)?
 
     init(style: Style) {
         self.style = style
@@ -692,7 +716,7 @@ final class KeyButton: UIButton {
         layer.masksToBounds = true
 
         addTarget(self, action: #selector(touchDown), for: .touchDown)
-        addTarget(self, action: #selector(touchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel])
+        addTarget(self, action: #selector(touchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel, .touchDragExit])
     }
 
     private var styleBackground: UIColor {
@@ -715,10 +739,129 @@ final class KeyButton: UIButton {
         case .returnKey:
             backgroundColor = KeyboardPalette.returnKey.withAlphaComponent(0.85)
         }
+        if style == .letter {
+            onBeginPreview?()
+        }
     }
 
     @objc private func touchUp() {
         backgroundColor = styleBackground
+        if style == .letter {
+            onEndPreview?()
+        }
+    }
+}
+
+// MARK: - Key preview (native-style pop-up above pressed keys)
+
+private final class KeyPreviewView: UIView {
+    private let plate = UIView()
+    private let label = UILabel()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        isHidden = true
+        alpha = 0
+
+        plate.layer.cornerRadius = 6
+        plate.layer.masksToBounds = true
+        plate.translatesAutoresizingMaskIntoConstraints = false
+
+        label.font = .systemFont(ofSize: 40, weight: .light)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+
+        addSubview(plate)
+        plate.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            plate.leadingAnchor.constraint(equalTo: leadingAnchor),
+            plate.trailingAnchor.constraint(equalTo: trailingAnchor),
+            plate.topAnchor.constraint(equalTo: topAnchor),
+            plate.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            label.leadingAnchor.constraint(equalTo: plate.leadingAnchor, constant: 4),
+            label.trailingAnchor.constraint(equalTo: plate.trailingAnchor, constant: -4),
+            label.topAnchor.constraint(equalTo: plate.topAnchor, constant: 2),
+            label.bottomAnchor.constraint(equalTo: plate.bottomAnchor, constant: -2),
+        ])
+
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.18
+        layer.shadowRadius = 6
+        layer.shadowOffset = CGSize(width: 0, height: 2)
+
+        refreshColors()
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func refreshColors() {
+        plate.backgroundColor = KeyboardPalette.key
+        label.textColor = KeyboardPalette.label
+    }
+
+    func present(text: String, sourceView: UIView, in container: UIView) {
+        label.text = text
+
+        let sourceFrame = sourceView.convert(sourceView.bounds, to: container)
+        let width = max(sourceFrame.width * 1.18, 52)
+        let height: CGFloat = 56
+        let horizontalInset: CGFloat = 3
+
+        var x = sourceFrame.midX - width / 2
+        x = max(horizontalInset, min(x, container.bounds.width - width - horizontalInset))
+
+        // Overlap the key slightly so the preview feels attached, like the system keyboard.
+        let y = sourceFrame.minY - height + 12
+
+        frame = CGRect(x: x, y: y, width: width, height: height)
+        container.bringSubviewToFront(self)
+        isHidden = false
+
+        if alpha < 1 {
+            transform = CGAffineTransform(scaleX: 0.88, y: 0.88).translatedBy(x: 0, y: 6)
+            UIView.animate(
+                withDuration: 0.07,
+                delay: 0,
+                options: [.curveEaseOut, .allowUserInteraction, .beginFromCurrentState]
+            ) {
+                self.alpha = 1
+                self.transform = .identity
+            }
+        }
+    }
+
+    func dismiss(animated: Bool = true) {
+        guard !isHidden, alpha > 0 else {
+            isHidden = true
+            alpha = 0
+            transform = .identity
+            return
+        }
+
+        guard animated else {
+            isHidden = true
+            alpha = 0
+            transform = .identity
+            return
+        }
+
+        UIView.animate(
+            withDuration: 0.05,
+            delay: 0,
+            options: [.curveEaseIn, .allowUserInteraction, .beginFromCurrentState]
+        ) {
+            self.alpha = 0
+            self.transform = CGAffineTransform(scaleX: 0.92, y: 0.92).translatedBy(x: 0, y: 4)
+        } completion: { _ in
+            self.isHidden = true
+            self.transform = .identity
+        }
     }
 }
 

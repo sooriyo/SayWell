@@ -16,6 +16,7 @@
 		1C7B86A291A38EFAA18300CC /* CommonPhrasesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */; };
 		3BD1A2F765BF0D34C39F6612 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
 		474E93F9F1F0546C283A01B5 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
+		4982C877804C370F569D7D96 /* PrivacyDisclosureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4293CB5C65E8B125AAA14FD3 /* PrivacyDisclosureView.swift */; };
 		4AE8FD04DCFD7BA1984FB696 /* TranslationHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */; };
 		4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
 		509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E61B148C08C617CA67F25744 /* KeyboardView.swift */; };
@@ -29,8 +30,10 @@
 		BECF1F022A368B77C272F376 /* TranslationComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A162156330BB6482195590D /* TranslationComponents.swift */; };
 		C2E28C18C9CD8CA65150EFB8 /* LocalPhraseCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */; };
 		C831D996570E4C0CF9CE6BC0 /* SayWellTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B698604D92F098295E3D8 /* SayWellTheme.swift */; };
+		CBC5D2292317699F981ED52B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 818AA3CC2D814D5E07324525 /* PrivacyInfo.xcprivacy */; };
 		CDBA4FCAF7F495A1FBAC1E18 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79D8AD5124A7F60AA47909E6 /* Assets.xcassets */; };
 		E4AF45D44FC15C5452DA2E9A /* TranslationSuggester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F8D401C09948DC945AE574 /* TranslationSuggester.swift */; };
+		E50E20E8BA898B2577C0596D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 584394D89FE942D7514ADF6E /* PrivacyInfo.xcprivacy */; };
 		EEFCE895C48909945C474993 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */; };
 		F4FF2869F93C9D1B67B54120 /* KeyboardSetupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44E749D94B109273CB2F7A1 /* KeyboardSetupViews.swift */; };
 /* End PBXBuildFile section */
@@ -65,11 +68,14 @@
 		1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationViewModel.swift; sourceTree = "<group>"; };
 		2A162156330BB6482195590D /* TranslationComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationComponents.swift; sourceTree = "<group>"; };
 		2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIDStore.swift; sourceTree = "<group>"; };
+		4293CB5C65E8B125AAA14FD3 /* PrivacyDisclosureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyDisclosureView.swift; sourceTree = "<group>"; };
+		584394D89FE942D7514ADF6E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonPhrasesStore.swift; sourceTree = "<group>"; };
 		66042E156175D4B72AB125DD /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
 		77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationModels.swift; sourceTree = "<group>"; };
 		79D8AD5124A7F60AA47909E6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7FBC1841814C133F9DF5F101 /* SayWell.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SayWell.entitlements; sourceTree = "<group>"; };
+		818AA3CC2D814D5E07324525 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryStore.swift; sourceTree = "<group>"; };
 		9F9F1C1F35006D2F501CB4BC /* FloatingNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingNavBar.swift; sourceTree = "<group>"; };
 		AA1B698604D92F098295E3D8 /* SayWellTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellTheme.swift; sourceTree = "<group>"; };
@@ -91,6 +97,7 @@
 				C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */,
 				9F9F1C1F35006D2F501CB4BC /* FloatingNavBar.swift */,
 				D44E749D94B109273CB2F7A1 /* KeyboardSetupViews.swift */,
+				4293CB5C65E8B125AAA14FD3 /* PrivacyDisclosureView.swift */,
 				EFBCE2B830AA4BCCEAD89FFE /* RecentTranslationsSection.swift */,
 				2A162156330BB6482195590D /* TranslationComponents.swift */,
 			);
@@ -102,6 +109,7 @@
 			children = (
 				E61B148C08C617CA67F25744 /* KeyboardView.swift */,
 				66042E156175D4B72AB125DD /* KeyboardViewController.swift */,
+				818AA3CC2D814D5E07324525 /* PrivacyInfo.xcprivacy */,
 				07F8D401C09948DC945AE574 /* TranslationSuggester.swift */,
 			);
 			path = SayWellKeyboard;
@@ -160,6 +168,7 @@
 			isa = PBXGroup;
 			children = (
 				79D8AD5124A7F60AA47909E6 /* Assets.xcassets */,
+				584394D89FE942D7514ADF6E /* PrivacyInfo.xcprivacy */,
 				7FBC1841814C133F9DF5F101 /* SayWell.entitlements */,
 				E475D773A141A4599D2F48D5 /* SayWellApp.swift */,
 				36172409B6647FA1E83C6726 /* Theme */,
@@ -197,6 +206,7 @@
 			buildConfigurationList = C22035DC0B805CEE0D39E735 /* Build configuration list for PBXNativeTarget "SayWellKeyboard" */;
 			buildPhases = (
 				F9A4D1D58D0774C785AD1837 /* Sources */,
+				C8F7AF8FFA8C616E6E07408D /* Resources */,
 			);
 			buildRules = (
 			);
@@ -254,6 +264,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				CDBA4FCAF7F495A1FBAC1E18 /* Assets.xcassets in Resources */,
+				E50E20E8BA898B2577C0596D /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C8F7AF8FFA8C616E6E07408D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CBC5D2292317699F981ED52B /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +290,7 @@
 				F4FF2869F93C9D1B67B54120 /* KeyboardSetupViews.swift in Sources */,
 				70759A9E1FAB3EC100B98B51 /* KeyboardStatusStore.swift in Sources */,
 				C2E28C18C9CD8CA65150EFB8 /* LocalPhraseCache.swift in Sources */,
+				4982C877804C370F569D7D96 /* PrivacyDisclosureView.swift in Sources */,
 				79F8394F5C9913E21ED63525 /* RecentTranslationsSection.swift in Sources */,
 				4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */,
 				52DCC0187917352FBBB4E690 /* SayWellApp.swift in Sources */,

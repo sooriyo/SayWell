@@ -14,6 +14,7 @@ final class KeyboardViewController: UIInputViewController {
         // Kill any system-provided opaque fill so only our clear glass shows.
         inputView?.backgroundColor = .clear
         inputView?.isOpaque = false
+        inputView?.clipsToBounds = false
 
         setupKeyboard()
         bindSuggester()
@@ -43,6 +44,7 @@ final class KeyboardViewController: UIInputViewController {
         // Fully transparent — system provides the keyboard chrome/blur.
         view.backgroundColor = .clear
         view.isOpaque = false
+        view.clipsToBounds = false
 
         let keyboard = SayWellKeyboardView(frame: .zero)
         keyboard.translatesAutoresizingMaskIntoConstraints = false

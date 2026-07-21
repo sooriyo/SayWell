@@ -149,7 +149,13 @@ enum CommonPhrasesStore {
 
     /// Lookup a phrase in the locally-stored common phrases.
     static func lookup(phrase: String) -> String? {
-        let key = phrase.lowercased()
+        // Strip trailing punctuation (? ! .) that normalize() appends as separate tokens
+        // so "bath kawa da ?" matches the stored phrase "bath kawa da"
+        let cleaned = phrase.lowercased()
+            .replacingOccurrences(of: #"\s+[.!?]+\s*$"#, with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespaces)
+
+        let key = cleaned.isEmpty ? phrase.lowercased() : cleaned
         return loadLocal()?.phrases[key]
     }
 
