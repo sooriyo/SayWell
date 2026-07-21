@@ -7,8 +7,16 @@ enum KeyboardKey: Equatable {
     case backspace
     case shift
     case layoutToggle
+    case symbolsToggle
     case globe
+    case emoji
     case acceptSuggestion
+}
+
+private enum KeyboardLayout {
+    case letters
+    case numbers
+    case symbols
 }
 
 protocol SayWellKeyboardViewDelegate: AnyObject {
@@ -22,9 +30,9 @@ final class SayWellKeyboardView: UIView {
 
     private let suggestionBar = SuggestionBarView()
     private let rowsStack = UIStackView()
-    private var shiftEnabled = true
+    private var shiftEnabled = false
     private var shiftLocked = false
-    private var showingNumbers = false
+    private var layout: KeyboardLayout = .letters
     private var returnTitle = "return"
     private var showsGlobe = true
 
@@ -37,6 +45,12 @@ final class SayWellKeyboardView: UIView {
     private let numberRows: [[String]] = [
         ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
         ["-", "/", ":", ";", "(", ")", "$", "&", "@", "\""],
+        [".", ",", "?", "!", "'"],
+    ]
+
+    private let symbolRows: [[String]] = [
+        ["[", "]", "{", "}", "#", "%", "^", "*", "+", "="],
+        ["_", "\\", "|", "~", "<", ">", "€", "£", "¥", "•"],
         [".", ",", "?", "!", "'"],
     ]
 
@@ -103,10 +117,27 @@ final class SayWellKeyboardView: UIView {
     }
 
     func toggleLayout() {
-        showingNumbers.toggle()
-        if !showingNumbers {
-            shiftEnabled = true
+        switch layout {
+        case .letters:
+            layout = .numbers
+            shiftEnabled = false
             shiftLocked = false
+        case .numbers, .symbols:
+            layout = .letters
+            shiftEnabled = false
+            shiftLocked = false
+        }
+        rebuildKeys()
+    }
+
+    func toggleSymbols() {
+        switch layout {
+        case .numbers:
+            layout = .symbols
+        case .symbols:
+            layout = .numbers
+        case .letters:
+            break
         }
         rebuildKeys()
     }
@@ -146,7 +177,16 @@ final class SayWellKeyboardView: UIView {
             $0.removeFromSuperview()
         }
 
-        let rows = showingNumbers ? numberRows : letterRows
+        let rows: [[String]]
+        switch layout {
+        case .letters:
+            rows = letterRows
+        case .numbers:
+            rows = numberRows
+        case .symbols:
+            rows = symbolRows
+        }
+
         for (index, row) in rows.enumerated() {
             let rowView = makeLetterRow(row, rowIndex: index)
             rowView.heightAnchor.constraint(equalToConstant: keyHeight).isActive = true
@@ -167,8 +207,7 @@ final class SayWellKeyboardView: UIView {
         for raw in characters {
             let insert = insertValue(for: raw)
             let button = KeyButton(style: .letter)
-            // Native always draws uppercase glyphs on letter keys.
-            button.setTitle(showingNumbers ? raw : raw.uppercased(), for: .normal)
+            button.setTitle(displayTitle(for: raw), for: .normal)
             button.addAction(UIAction { [weak self] _ in
                 guard let self else { return }
                 self.delegate?.keyboardView(self, didTapKey: .character(insert))
@@ -177,7 +216,7 @@ final class SayWellKeyboardView: UIView {
             letters.addArrangedSubview(button)
         }
 
-        if !showingNumbers, rowIndex == 1 {
+        if layout == .letters, rowIndex == 1 {
             let wrapper = UIStackView()
             wrapper.axis = .horizontal
             wrapper.addArrangedSubview(flexibleSpacer(18))
@@ -193,7 +232,8 @@ final class SayWellKeyboardView: UIView {
             row.alignment = .fill
             row.distribution = .fill
 
-            if !showingNumbers {
+            switch layout {
+            case .letters:
                 let shift = KeyButton(style: .action)
                 let symbol = shiftLocked ? "capslock.fill" : (shiftEnabled ? "shift.fill" : "shift")
                 shift.setSymbol(systemName: symbol, pointSize: 15)
@@ -206,8 +246,28 @@ final class SayWellKeyboardView: UIView {
                 }, for: .touchUpInside)
                 shift.widthAnchor.constraint(equalToConstant: 42).isActive = true
                 row.addArrangedSubview(shift)
-            } else {
-                row.addArrangedSubview(flexibleSpacer(42))
+
+            case .numbers:
+                let symbols = KeyButton(style: .action)
+                symbols.setTitle("#+=", for: .normal)
+                symbols.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
+                symbols.addAction(UIAction { [weak self] _ in
+                    guard let self else { return }
+                    self.delegate?.keyboardView(self, didTapKey: .symbolsToggle)
+                }, for: .touchUpInside)
+                symbols.widthAnchor.constraint(equalToConstant: 42).isActive = true
+                row.addArrangedSubview(symbols)
+
+            case .symbols:
+                let numbers = KeyButton(style: .action)
+                numbers.setTitle("123", for: .normal)
+                numbers.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
+                numbers.addAction(UIAction { [weak self] _ in
+                    guard let self else { return }
+                    self.delegate?.keyboardView(self, didTapKey: .symbolsToggle)
+                }, for: .touchUpInside)
+                numbers.widthAnchor.constraint(equalToConstant: 42).isActive = true
+                row.addArrangedSubview(numbers)
             }
 
             row.addArrangedSubview(letters)
@@ -233,17 +293,16 @@ final class SayWellKeyboardView: UIView {
         stack.alignment = .fill
         stack.distribution = .fill
 
-        let layout = KeyButton(style: .action)
-        layout.setTitle(showingNumbers ? "ABC" : "123", for: .normal)
-        layout.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
-        layout.widthAnchor.constraint(equalToConstant: 42).isActive = true
-        layout.addAction(UIAction { [weak self] _ in
+        let layoutKey = KeyButton(style: .action)
+        layoutKey.setTitle(layout == .letters ? "123" : "ABC", for: .normal)
+        layoutKey.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
+        layoutKey.widthAnchor.constraint(equalToConstant: 42).isActive = true
+        layoutKey.addAction(UIAction { [weak self] _ in
             guard let self else { return }
             self.delegate?.keyboardView(self, didTapKey: .layoutToggle)
         }, for: .touchUpInside)
-        stack.addArrangedSubview(layout)
+        stack.addArrangedSubview(layoutKey)
 
-        // Native puts emoji here; we use globe when the system asks for an input-mode switch.
         if showsGlobe {
             let globe = KeyButton(style: .action)
             globe.setSymbol(systemName: "globe", pointSize: 16)
@@ -254,6 +313,15 @@ final class SayWellKeyboardView: UIView {
             }, for: .touchUpInside)
             stack.addArrangedSubview(globe)
         }
+
+        let emoji = KeyButton(style: .action)
+        emoji.setSymbol(systemName: "face.smiling", pointSize: 16)
+        emoji.widthAnchor.constraint(equalToConstant: 42).isActive = true
+        emoji.addAction(UIAction { [weak self] _ in
+            guard let self else { return }
+            self.delegate?.keyboardView(self, didTapKey: .emoji)
+        }, for: .touchUpInside)
+        stack.addArrangedSubview(emoji)
 
         let space = KeyButton(style: .space)
         space.setTitle("space", for: .normal)
@@ -287,8 +355,16 @@ final class SayWellKeyboardView: UIView {
         !["return", "default"].contains(returnTitle.lowercased())
     }
 
+    private func displayTitle(for raw: String) -> String {
+        guard layout == .letters else { return raw }
+        if shiftEnabled || shiftLocked {
+            return raw.uppercased()
+        }
+        return raw
+    }
+
     private func insertValue(for raw: String) -> String {
-        guard !showingNumbers else { return raw }
+        guard layout == .letters else { return raw }
         if shiftEnabled || shiftLocked {
             return raw.uppercased()
         }
@@ -296,7 +372,7 @@ final class SayWellKeyboardView: UIView {
     }
 
     private func consumeShiftAfterCharacter() {
-        guard !showingNumbers, shiftEnabled, !shiftLocked else { return }
+        guard layout == .letters, shiftEnabled, !shiftLocked else { return }
         shiftEnabled = false
         rebuildKeys()
     }

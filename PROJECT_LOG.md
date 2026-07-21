@@ -67,6 +67,11 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Native-style uppercase keys, SF Symbols, system blue return key
 - User confirmed this look as **"perfect"** — avoid re-adding glass/blur/borders unless asked
 
+### Current focus (Jul 21)
+- **Next ship target:** App Store v1.0 — privacy, legal, and compliance (**Tier 0** in [FUTURE_PLANS.md](FUTURE_PLANS.md))
+- **Not before release:** tone selector, alternatives, and other Tier 1 UX (v1.1)
+- **Data flows agents must know:** typed phrases → Cloudflare Worker → Gemini on cache miss; `X-Device-Id` for rate limits; miss logs include raw text today (harden before launch)
+
 ## iOS commit history (high level)
 
 | Commit | Summary |
@@ -176,3 +181,10 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Recent translations section (last 8); tap to re-translate
 - `TranslationSource` now `Codable` + `builtin` for backend builtin phrases
 - Xcode recommended settings applied: user script sandboxing + string catalog symbol generation (also in `project.yml`)
+
+### 2026-07-21 — Roadmap refocus: privacy before App Store
+**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 11:24AM
+- Refocused [FUTURE_PLANS.md](FUTURE_PLANS.md): **Tier 0** = privacy policy, terms, in-app disclosure, privacy manifest, App Store labels, backend log/CORS hardening, sensitive-field guardrails
+- Tier 1 feature work (tone, alternatives) deferred until after v1.0 submit
+- Marked recent history + local phrase cache as shipped in baseline; v1.1 bundle updated accordingly
+- Added **Current focus** section here for agent handoff

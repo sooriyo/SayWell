@@ -8,6 +8,8 @@ SayWell translates **Singlish** (romanized Sinhala, often code-mixed with Englis
 
 Future work should deepen **control**, **confidence**, and **reuse** — without cluttering the approved minimal keyboard UI.
 
+**Current focus (Jul 21):** Ship **privacy, legal, and App Store readiness** before new UX features. See **Tier 0** below.
+
 ---
 
 ## Current capabilities (baseline)
@@ -18,8 +20,9 @@ Future work should deepen **control**, **confidence**, and **reuse** — without
 | **Sources** | `builtin` (common phrases) → `cache` (KV) → `model` (Gemini) |
 | **Prompt** | Preserves implicit tone (“casual stays casual”); no user-facing tone control |
 | **Keyboard** | 700ms debounce, phrase = text since last `.` `!` `?` or newline; tap suggestion to replace phrase |
-| **Host app** | Translate, copy/share, examples, normalized spelling, keyboard setup, floating nav |
-| **Shared state** | App Group `group.dev.saywell.app` — device ID only (no user prefs yet) |
+| **Host app** | Translate, copy/share, examples, normalized spelling, keyboard setup, floating nav, recent history (last 8) |
+| **Shared state** | App Group `group.dev.saywell.app` — device ID, keyboard status, local phrase cache (~100 entries) |
+| **Privacy / legal** | Not shipped — no policy URL, privacy manifest, in-app disclosure, or App Store labels yet |
 
 ---
 
@@ -45,12 +48,33 @@ Future work should deepen **control**, **confidence**, and **reuse** — without
 ## Recommended roadmap
 
 ```text
-Now ──► Tone selector ──► Multiple alternatives ──► History & favorites
-              │                      │                         │
-              └──────────► Context presets ──► Explain mode ──┘
+Now ──► Tier 0: Privacy & App Store gate ──► v1.0 submit ──► v1.1 UX bundle
+                    │
+                    └──► Tone ──► Alternatives ──► Favorites / context / explain
 ```
 
-### Tier 1 — High impact (ship first)
+### Tier 0 — App Store release gate (ship first)
+
+Block public release until these are done. Keyboard + Full Access + third-party AI (Gemini) will trigger App Review scrutiny.
+
+| Item | Notes |
+|------|--------|
+| **Privacy Policy** | Hosted URL: what leaves device (typed phrases), `X-Device-Id`, Cloudflare + Gemini subprocessors, retention (KV 30d, logs), no account/ads/sale |
+| **Terms of Use** | Translation aid, no accuracy guarantee, don’t use in password/OTP fields, rate limits |
+| **In-app Privacy screen** | What leaves device vs stays local; why Full Access; links to policy; clear history + local cache |
+| **Privacy Manifest** | `PrivacyInfo.xcprivacy` — UserDefaults/App Group, networking, required-reason APIs |
+| **App Store privacy labels** | User content + device ID sent to server; third-party AI; not used for tracking |
+| **App Review notes** | Explain Full Access + `/translate` network path; no keylogging |
+| **Backend hardening** | Stop/redact raw `translation_miss` logs in prod; tighten `ALLOWED_ORIGINS` before launch |
+| **Sensitive-field guardrails** | Warn users; disable network translate in secure/password contexts where possible |
+| **Export compliance** | `ITSAppUsesNonExemptEncryption = NO` if HTTPS-only |
+| **Production bundle ID** | Consider `app.saywell.*` instead of `dev.saywell.app` for public listing |
+
+**Suggested order:** policy + terms → in-app screen → privacy manifest → backend log/CORS → TestFlight → submit.
+
+---
+
+### Tier 1 — High impact (after v1.0)
 
 #### 1. Tone / register selector
 
@@ -99,9 +123,11 @@ Return 2–3 variants instead of one (e.g. natural / shorter / more polite).
 
 #### 3. Translation history & favorites
 
+**Shipped (partial):** recent translations in host app (last 8, tap to re-translate). Still to do: favorites, search, keyboard chips.
+
 **Host app**
 
-- Recent translations (Singlish ↔ English, timestamp, source).
+- ~~Recent translations (Singlish ↔ English, timestamp, source).~~ ✅
 - Star favorites; search.
 
 **Keyboard**
@@ -110,7 +136,7 @@ Return 2–3 variants instead of one (e.g. natural / shorter / more polite).
 
 **Storage**
 
-- App Group `UserDefaults` or small JSON file in shared container.
+- Host history in `UserDefaults`; local phrase cache in App Group (`LocalPhraseCache`).
 - No API change for replaying cached phrases (client can re-fetch or store English locally).
 
 ---
@@ -168,25 +194,34 @@ Help users understand translations, not only convert.
 
 ---
 
-### Tier 4 — Trust & polish
+### Tier 4 — Trust & polish (post-launch)
 
 | Feature | Notes |
 |---------|--------|
-| **Privacy summary** | Clear copy: what leaves device, caching, no account |
 | **Settings screen** | Tone, context, history — synced via App Group to keyboard |
 | **Rate-limit UX** | Countdown from `Retry-After` when 429 |
 | **Accessibility** | VoiceOver labels for all suggestion bar states |
 | **Dark mode** | Keyboard palette exists; ensure host app parity |
 
+*(Privacy summary, policy, and manifest moved to **Tier 0** — required before App Store submit.)*
+
 ---
 
-## Suggested first bundle (v1.1)
+## Suggested release bundles
+
+### v1.0 — App Store (current focus)
+
+1. Tier 0 privacy & compliance checklist (all items)
+2. TestFlight smoke test (keyboard setup + Full Access funnel)
+3. App Store submit
+
+### v1.1 — UX lift (after v1.0)
 
 Ship together for maximum UX lift without keyboard clutter:
 
 1. Tone selector (App Group sync)
 2. Two alternatives on host app (keyboard can show primary only at first)
-3. Translation history (host app)
+3. History favorites + search (recent list already shipped)
 4. Undo toast on keyboard accept
 
 ---
@@ -224,7 +259,8 @@ Ship together for maximum UX lift without keyboard clutter:
 |--------|---------|-----|
 | Tone | `prompt.ts`, `index.ts`, cache key | `TranslationModels.swift`, `SayWellAPI.swift`, settings UI, App Group prefs |
 | Alternatives | `gemini.ts`, response parsing | `TranslationViewModel`, suggestion bar swipe |
-| History | — | new `HistoryStore.swift`, App Group storage |
+| History | — | `TranslationHistoryStore.swift` (shipped); favorites → App Group |
+| Privacy / App Store | redact miss logs, CORS | `PrivacyInfo.xcprivacy`, privacy screen, policy links |
 | Explain | new prompt / endpoint | expandable result UI |
 
 ### Testing
@@ -251,4 +287,4 @@ Ship together for maximum UX lift without keyboard clutter:
 
 ---
 
-*Last updated: Jul 21, 2026 — Cursor Auto (future plans doc created from UX review session).*
+*Last updated: Jul 21, 2026 — Cursor Auto (refocused roadmap: Tier 0 privacy/App Store gate before feature work).*

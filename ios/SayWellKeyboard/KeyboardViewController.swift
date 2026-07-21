@@ -141,7 +141,11 @@ extension KeyboardViewController: SayWellKeyboardViewDelegate {
             view.toggleShift()
         case .layoutToggle:
             view.toggleLayout()
+        case .symbolsToggle:
+            view.toggleSymbols()
         case .globe:
+            advanceToNextInputMode()
+        case .emoji:
             advanceToNextInputMode()
         case .acceptSuggestion:
             if case let .ready(phrase, translation) = view.currentSuggestion {
