@@ -11,3 +11,6 @@ xcuserdata/
 # Swift Package Manager
 .build/
 .swiftpm/
+
+# Backend (separate git repo — github.com/sooriyo/saywell-backend)
+backend/
