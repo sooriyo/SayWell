@@ -50,7 +50,7 @@
 
 /* Begin PBXFileReference section */
 		07F8D401C09948DC945AE574 /* TranslationSuggester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationSuggester.swift; sourceTree = "<group>"; };
-		13384F357F07A00CBA941FBB /* SayWellKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SayWellKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		13384F357F07A00CBA941FBB /* SayWellKeyboard.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = SayWellKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationViewModel.swift; sourceTree = "<group>"; };
 		2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIDStore.swift; sourceTree = "<group>"; };
 		66042E156175D4B72AB125DD /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
@@ -59,7 +59,7 @@
 		7FBC1841814C133F9DF5F101 /* SayWell.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SayWell.entitlements; sourceTree = "<group>"; };
 		AA1B698604D92F098295E3D8 /* SayWellTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellTheme.swift; sourceTree = "<group>"; };
 		C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		D5B62247EE53059B7815FDC9 /* SayWell.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SayWell.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5B62247EE53059B7815FDC9 /* SayWell.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SayWell.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E475D773A141A4599D2F48D5 /* SayWellApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellApp.swift; sourceTree = "<group>"; };
 		E61B148C08C617CA67F25744 /* KeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardView.swift; sourceTree = "<group>"; };
 		F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellAPI.swift; sourceTree = "<group>"; };
@@ -190,6 +190,16 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					6EBC1C90E1C66AC715EF8DE6 = {
+						DevelopmentTeam = B2FR24RN8D;
+						ProvisioningStyle = Automatic;
+					};
+					AA6FFB8B77686AAF6E18AB6F = {
+						DevelopmentTeam = B2FR24RN8D;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = 579E54D5AEC784AFB75445D1 /* Build configuration list for PBXProject "SayWell" */;
 			developmentRegion = en;
@@ -294,10 +304,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = B2FR24RN8D;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -331,15 +341,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SayWellKeyboard/SayWellKeyboard.entitlements;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B2FR24RN8D;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = SayWellKeyboard/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.saywell.app.keyboard;
 				SDKROOT = iphoneos;
@@ -355,6 +362,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentTeal;
 				CODE_SIGN_ENTITLEMENTS = SayWell/SayWell.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B2FR24RN8D;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -382,6 +390,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentTeal;
 				CODE_SIGN_ENTITLEMENTS = SayWell/SayWell.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B2FR24RN8D;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -435,10 +444,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = B2FR24RN8D;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -465,15 +474,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SayWellKeyboard/SayWellKeyboard.entitlements;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B2FR24RN8D;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = SayWellKeyboard/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.saywell.app.keyboard;
 				SDKROOT = iphoneos;

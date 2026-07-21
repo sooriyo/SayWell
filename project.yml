@@ -10,10 +10,21 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     TARGETED_DEVICE_FAMILY: "1,2"
-    DEVELOPMENT_TEAM: ""
-    # Avoid intermittent "entitlements file was modified during the build" failures
-    # when Xcode touches the entitlements plist while signing.
-    CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION: YES
+    # Apple Development: tharukaravisara@gmail.com
+    DEVELOPMENT_TEAM: B2FR24RN8D
+    CODE_SIGN_STYLE: Automatic
+
+schemes:
+  SayWell:
+    build:
+      targets:
+        SayWell: all
+        SayWellKeyboard: [build]
+    run:
+      config: Debug
+      executable: SayWell
+    archive:
+      config: Release
 
 targets:
   SayWell:
@@ -37,6 +48,8 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentTeal
         CODE_SIGN_ENTITLEMENTS: SayWell/SayWell.entitlements
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: B2FR24RN8D
     entitlements:
       path: SayWell/SayWell.entitlements
       properties:
@@ -62,6 +75,8 @@ targets:
         MARKETING_VERSION: "1.0.0"
         CURRENT_PROJECT_VERSION: "1"
         CODE_SIGN_ENTITLEMENTS: SayWellKeyboard/SayWellKeyboard.entitlements
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: B2FR24RN8D
         SKIP_INSTALL: YES
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
     entitlements:

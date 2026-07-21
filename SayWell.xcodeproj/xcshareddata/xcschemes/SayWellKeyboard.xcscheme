@@ -57,12 +57,8 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
-      <RemoteRunnable
-         runnableDebuggingMode = "0"
-         BundleIdentifier = "com.maximimpressions.saywell"
-         RemotePath = "/var/containers/Bundle/Application/AAEE6FEB-F8CF-4EBA-A766-A7B73D4180E6/SayWell.app">
-      </RemoteRunnable>
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6EBC1C90E1C66AC715EF8DE6"
@@ -70,7 +66,7 @@
             BlueprintName = "SayWell"
             ReferencedContainer = "container:SayWell.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
