@@ -117,7 +117,6 @@ final class KeyboardViewController: UIInputViewController {
         }
         textDocumentProxy.insertText(english)
         suggester.reset()
-        refreshSuggestion()
     }
 }
 
