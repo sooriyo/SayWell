@@ -4,6 +4,9 @@ import UIKit
 struct ContentView: View {
     @State private var viewModel = TranslationViewModel()
     @FocusState private var inputFocused: Bool
+    @AppStorage("keyboardSetupExpanded") private var keyboardSetupExpanded = true
+    @State private var isNavScrolled = false
+    @State private var scrollTarget: String?
 
     var body: some View {
         ZStack {
@@ -13,37 +16,81 @@ struct ContentView: View {
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
-                    brandHeader
-                    inputSection
-                    actionRow
-                    resultSection
-                    examplesSection
-                    keyboardSetupSection
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 28) {
+                        heroSection
+                        inputSection
+                        actionRow
+                        resultSection
+                            .id("result")
+                        if !viewModel.isLoading {
+                            examplesSection
+                        }
+                        keyboardSetupSection
+                            .id("keyboard")
+                    }
+                    .padding(.horizontal, 22)
+                    .padding(.top, 4)
+                    .padding(.bottom, 36)
+                    .background(ScrollOffsetTracker())
                 }
-                .padding(.horizontal, 22)
-                .padding(.top, 12)
-                .padding(.bottom, 36)
+                .coordinateSpace(name: "saywellScroll")
+                .scrollDismissesKeyboard(.interactively)
+                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { offset in
+                    let scrolled = offset < -12
+                    if scrolled != isNavScrolled {
+                        isNavScrolled = scrolled
+                    }
+                }
+                .onChange(of: viewModel.scrollToken) { _, _ in
+                    guard viewModel.scrollToken != "welcome" else { return }
+                    scrollTarget = "result"
+                }
+                .onChange(of: scrollTarget) { _, target in
+                    guard let target else { return }
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
+                        proxy.scrollTo(target, anchor: .top)
+                    }
+                    scrollTarget = nil
+                }
             }
-            .scrollDismissesKeyboard(.interactively)
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            FloatingNavBar(
+                isScrolled: isNavScrolled,
+                hasInput: !viewModel.inputText.isEmpty,
+                onClear: {
+                    viewModel.clear()
+                    inputFocused = true
+                },
+                onKeyboard: {
+                    keyboardSetupExpanded = true
+                    scrollTarget = "keyboard"
+                },
+                onSettings: openSettings
+            )
+            .padding(.horizontal, 16)
+            .padding(.top, 6)
+            .padding(.bottom, 10)
         }
         .preferredColorScheme(.light)
+        .animation(.spring(response: 0.35, dampingFraction: 0.86), value: viewModel.phase)
     }
 
-    private var brandHeader: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("SayWell")
-                .font(SayWellTheme.brandMark)
-                .foregroundStyle(SayWellTheme.ink)
-                .accessibilityAddTraits(.isHeader)
+    private var heroSection: some View {
+        Text("Type in Singlish. Say it well in English.")
+            .font(.system(.title3, design: .serif))
+            .foregroundStyle(SayWellTheme.lagoon.opacity(0.9))
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, 4)
+            .accessibilityAddTraits(.isHeader)
+    }
 
-            Text("Type in Singlish. Say it well in English.")
-                .font(.system(.title3, design: .serif))
-                .foregroundStyle(SayWellTheme.lagoon.opacity(0.9))
-                .fixedSize(horizontal: false, vertical: true)
+    private func openSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
         }
-        .padding(.top, 8)
     }
 
     private var inputSection: some View {
@@ -109,20 +156,19 @@ struct ContentView: View {
         } label: {
             HStack(spacing: 10) {
                 if viewModel.isLoading {
-                    ProgressView()
-                        .tint(.white)
+                    AnimatedDotsView(color: .white.opacity(0.95), dotSize: 4)
                 } else {
                     Image(systemName: "arrow.right.circle.fill")
                         .symbolRenderingMode(.hierarchical)
                 }
-                Text(viewModel.isLoading ? "Translating…" : "Translate")
+                Text(viewModel.isLoading ? loadingButtonTitle : "Translate")
                     .font(.system(.body, design: .rounded).weight(.semibold))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .foregroundStyle(.white)
             .background(
-                viewModel.canTranslate
+                viewModel.canTranslate || viewModel.isLoading
                     ? AnyShapeStyle(
                         LinearGradient(
                             colors: [SayWellTheme.brand, SayWellTheme.lagoon],
@@ -134,55 +180,109 @@ struct ContentView: View {
                 in: RoundedRectangle(cornerRadius: 16, style: .continuous)
             )
         }
-        .disabled(!viewModel.canTranslate)
+        .disabled(viewModel.isLoading || !viewModel.canTranslate)
         .animation(.easeInOut(duration: 0.18), value: viewModel.canTranslate)
         .animation(.easeInOut(duration: 0.18), value: viewModel.isLoading)
     }
 
+    private var loadingButtonTitle: String {
+        let phrase = viewModel.trimmedInput
+        if phrase.count <= 18 {
+            return "Translating…"
+        }
+        return "Finding English…"
+    }
+
     @ViewBuilder
     private var resultSection: some View {
-        if let errorMessage = viewModel.errorMessage {
-            ResultPanel(
-                title: "Couldn't translate",
-                bodyText: errorMessage,
-                style: .error
-            )
-            .transition(.opacity.combined(with: .move(edge: .bottom)))
-        } else if let translation = viewModel.translation {
-            VStack(alignment: .leading, spacing: 14) {
+        switch viewModel.phase {
+        case .welcome:
+            TranslationWelcomeCard()
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+
+        case .loading(let phrase):
+            TranslationLoadingCard(phrase: phrase)
+                .transition(.opacity.combined(with: .scale(scale: 0.98)))
+
+        case .failure(let message):
+            VStack(alignment: .leading, spacing: 12) {
                 ResultPanel(
-                    title: "English",
-                    bodyText: translation.translation,
-                    style: .success,
-                    trailing: {
-                        HStack(spacing: 8) {
-                            SourceBadge(source: translation.source)
-                            Button {
-                                viewModel.copyTranslation()
-                            } label: {
-                                Label(
-                                    viewModel.didCopy ? "Copied" : "Copy",
-                                    systemImage: viewModel.didCopy ? "checkmark" : "doc.on.doc"
-                                )
-                                .font(.system(.caption, design: .rounded).weight(.semibold))
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(SayWellTheme.brand)
-                            .controlSize(.small)
-                        }
-                    }
+                    title: "Couldn't translate",
+                    bodyText: message,
+                    style: .error
                 )
 
-                let trimmed = viewModel.trimmedInput.lowercased()
-                if translation.normalized != trimmed {
-                    ResultPanel(
-                        title: "Normalized",
-                        bodyText: translation.normalized,
-                        style: .neutral
-                    )
+                Button {
+                    Task { await viewModel.retry() }
+                } label: {
+                    Label("Try again", systemImage: "arrow.clockwise")
+                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(SayWellTheme.brand)
             }
             .transition(.opacity.combined(with: .move(edge: .bottom)))
+
+        case .success:
+            if let translation = viewModel.translation {
+                VStack(alignment: .leading, spacing: 14) {
+                    ResultPanel(
+                        title: "English",
+                        bodyText: translation.translation,
+                        style: .success,
+                        trailing: {
+                            HStack(spacing: 8) {
+                                TranslationSourceBadge(source: translation.source)
+                                ShareLink(item: translation.translation) {
+                                    Label("Share", systemImage: "square.and.arrow.up")
+                                        .font(.system(.caption, design: .rounded).weight(.semibold))
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(SayWellTheme.brand)
+                                .controlSize(.small)
+
+                                Button {
+                                    viewModel.copyTranslation()
+                                } label: {
+                                    Label(
+                                        viewModel.didCopy ? "Copied" : "Copy",
+                                        systemImage: viewModel.didCopy ? "checkmark" : "doc.on.doc"
+                                    )
+                                    .font(.system(.caption, design: .rounded).weight(.semibold))
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(SayWellTheme.brand)
+                                .controlSize(.small)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: viewModel.didCopy)
+                            }
+                        }
+                    )
+
+                    let trimmed = viewModel.trimmedInput.lowercased()
+                    if translation.normalized != trimmed {
+                        ResultPanel(
+                            title: "Normalized spelling",
+                            bodyText: translation.normalized,
+                            style: .neutral
+                        )
+                    }
+
+                    Button {
+                        viewModel.clear()
+                        inputFocused = true
+                    } label: {
+                        Label("Translate another", systemImage: "plus.bubble")
+                            .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(SayWellTheme.lagoon)
+                }
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
         }
     }
 
@@ -195,10 +295,12 @@ struct ContentView: View {
             FlowLayout(spacing: 8) {
                 ForEach(ExamplePhrase.allCases) { example in
                     Button(example.label) {
+                        inputFocused = false
                         viewModel.useExample(example.text)
                         Task { await viewModel.translate() }
                     }
                     .buttonStyle(ExampleChipStyle())
+                    .disabled(viewModel.isLoading)
                 }
             }
         }
@@ -206,16 +308,8 @@ struct ContentView: View {
     }
 
     private var keyboardSetupSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Keyboard")
-                .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                .foregroundStyle(SayWellTheme.lagoon.opacity(0.75))
-
+        DisclosureGroup(isExpanded: $keyboardSetupExpanded) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Enable SayWell Keyboard")
-                    .font(.system(.body, design: .rounded).weight(.semibold))
-                    .foregroundStyle(SayWellTheme.ink)
-
                 VStack(alignment: .leading, spacing: 8) {
                     setupStep(number: 1, text: "Open Settings → General → Keyboard → Keyboards")
                     setupStep(number: 2, text: "Tap Add New Keyboard… → SayWell")
@@ -223,15 +317,13 @@ struct ContentView: View {
                     setupStep(number: 4, text: "In any app, tap 🌐 to switch to SayWell")
                 }
 
-                Text("Full Access is required so the keyboard can call the translation API. iOS will show Apple’s network-access prompt — that’s expected.")
+                Text("Full Access lets the keyboard reach the translation API. iOS will show Apple’s network prompt — that’s expected.")
                     .font(.system(.caption, design: .rounded))
                     .foregroundStyle(SayWellTheme.lagoon.opacity(0.7))
                     .fixedSize(horizontal: false, vertical: true)
 
                 Button {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
-                    }
+                    openSettings()
                 } label: {
                     Text("Open Settings")
                         .font(.system(.body, design: .rounded).weight(.semibold))
@@ -241,13 +333,24 @@ struct ContentView: View {
                         .background(SayWellTheme.brand, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
-            .padding(16)
-            .background(SayWellTheme.foam.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(SayWellTheme.lagoon.opacity(0.12), lineWidth: 1)
+            .padding(.top, 8)
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Keyboard")
+                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(SayWellTheme.lagoon.opacity(0.75))
+                Text("Enable SayWell in Settings")
+                    .font(.system(.footnote, design: .rounded))
+                    .foregroundStyle(SayWellTheme.ink.opacity(0.55))
             }
         }
+        .padding(16)
+        .background(SayWellTheme.foam.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(SayWellTheme.lagoon.opacity(0.12), lineWidth: 1)
+        }
+        .tint(SayWellTheme.brand)
     }
 
     private func setupStep(number: Int, text: String) -> some View {
@@ -364,22 +467,6 @@ private struct ResultPanel<Trailing: View>: View {
 extension ResultPanel where Trailing == EmptyView {
     init(title: String, bodyText: String, style: Style) {
         self.init(title: title, bodyText: bodyText, style: style, trailing: { EmptyView() })
-    }
-}
-
-private struct SourceBadge: View {
-    let source: TranslationSource
-
-    var body: some View {
-        Text(source == .cache ? "Cached" : "Live")
-            .font(.system(.caption2, design: .rounded).weight(.semibold))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(
-                (source == .cache ? SayWellTheme.brand : Color.orange).opacity(0.12),
-                in: Capsule()
-            )
-            .foregroundStyle(source == .cache ? SayWellTheme.brand : .orange)
     }
 }
 

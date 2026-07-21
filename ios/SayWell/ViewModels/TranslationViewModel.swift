@@ -5,6 +5,13 @@ import UIKit
 @Observable
 @MainActor
 final class TranslationViewModel {
+    enum Phase: Equatable {
+        case welcome
+        case loading(phrase: String)
+        case success
+        case failure(String)
+    }
+
     var inputText = ""
     var translation: TranslationResponse?
     var errorMessage: String?
@@ -33,6 +40,22 @@ final class TranslationViewModel {
         !trimmedInput.isEmpty && !isOverLimit && !isLoading
     }
 
+    var phase: Phase {
+        if isLoading { return .loading(phrase: trimmedInput) }
+        if translation != nil { return .success }
+        if let errorMessage { return .failure(errorMessage) }
+        return .welcome
+    }
+
+    var scrollToken: String {
+        switch phase {
+        case .welcome: "welcome"
+        case .loading: "loading"
+        case .success: "success"
+        case .failure: "failure"
+        }
+    }
+
     func translate() async {
         translateTask?.cancel()
 
@@ -40,12 +63,14 @@ final class TranslationViewModel {
         guard !text.isEmpty else {
             errorMessage = SayWellError.emptyInput.localizedDescription
             translation = nil
+            Haptics.notify(.warning)
             return
         }
 
         guard !isOverLimit else {
             errorMessage = SayWellError.inputTooLong.localizedDescription
             translation = nil
+            Haptics.notify(.warning)
             return
         }
 
@@ -59,6 +84,7 @@ final class TranslationViewModel {
                 let result = try await api.translate(text: text)
                 guard !Task.isCancelled else { return }
                 translation = result
+                Haptics.notify(.success)
             } catch is CancellationError {
                 return
             } catch let error as URLError where error.code == .cancelled {
@@ -66,9 +92,11 @@ final class TranslationViewModel {
             } catch let error as SayWellError {
                 guard !Task.isCancelled else { return }
                 errorMessage = error.localizedDescription
+                Haptics.notify(.error)
             } catch {
                 guard !Task.isCancelled else { return }
                 errorMessage = SayWellError.network(underlying: error).localizedDescription
+                Haptics.notify(.error)
             }
         }
 
@@ -80,10 +108,15 @@ final class TranslationViewModel {
         }
     }
 
+    func retry() async {
+        await translate()
+    }
+
     func copyTranslation() {
         guard let translation else { return }
         UIPasteboard.general.string = translation.translation
         didCopy = true
+        Haptics.impact(.light)
 
         copyResetTask?.cancel()
         copyResetTask = Task {
@@ -100,6 +133,7 @@ final class TranslationViewModel {
         errorMessage = nil
         translation = nil
         didCopy = false
+        Haptics.impact(.soft)
     }
 
     func clear() {
@@ -109,5 +143,17 @@ final class TranslationViewModel {
         errorMessage = nil
         translation = nil
         didCopy = false
+    }
+}
+
+// MARK: - Haptics
+
+private enum Haptics {
+    static func impact(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        UIImpactFeedbackGenerator(style: style).impactOccurred()
+    }
+
+    static func notify(_ type: UINotificationFeedbackGenerator.FeedbackType) {
+        UINotificationFeedbackGenerator().notificationOccurred(type)
     }
 }

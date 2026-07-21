@@ -21,7 +21,7 @@ Live API: `https://saywell-backend.saywell.workers.dev`
 
 This folder is a local workspace: `ios/` is tracked by the SayWell repo; `backend/` is a separate git repo (ignored by the iOS tree).
 
-**Agent handoff:** see [PROJECT_LOG.md](PROJECT_LOG.md) for session history and decisions.
+**Agent handoff:** [PROJECT_LOG.md](PROJECT_LOG.md) (history + current state) · [FUTURE_PLANS.md](FUTURE_PLANS.md) (roadmap)
 
 ## Quick start
 

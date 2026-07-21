@@ -313,12 +313,99 @@ final class SayWellKeyboardView: UIView {
 
 // MARK: - Predictive strip (no plate — floats on system keyboard chrome)
 
+/// Three pulsing dots — friendlier than a system spinner in the suggestion strip.
+final class AnimatedEllipsisView: UIView {
+    private let stack = UIStackView()
+    private let dotViews: [UIView]
+    private var isAnimating = false
+
+    override init(frame: CGRect) {
+        dotViews = (0..<3).map { _ in
+            let dot = UIView()
+            dot.translatesAutoresizingMaskIntoConstraints = false
+            dot.backgroundColor = KeyboardPalette.secondaryLabel
+            dot.layer.cornerRadius = 2
+            NSLayoutConstraint.activate([
+                dot.widthAnchor.constraint(equalToConstant: 4),
+                dot.heightAnchor.constraint(equalToConstant: 4),
+            ])
+            return dot
+        }
+
+        super.init(frame: frame)
+
+        stack.axis = .horizontal
+        stack.spacing = 3
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        dotViews.forEach { stack.addArrangedSubview($0) }
+        addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+
+        stopAnimating()
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func refreshColors() {
+        dotViews.forEach { $0.backgroundColor = KeyboardPalette.secondaryLabel }
+    }
+
+    func startAnimating() {
+        guard !isAnimating else { return }
+        isAnimating = true
+        pulseCycle()
+    }
+
+    func stopAnimating() {
+        isAnimating = false
+        layer.removeAllAnimations()
+        dotViews.forEach { $0.layer.removeAllAnimations() }
+        dotViews.forEach { $0.alpha = 0.35 }
+    }
+
+    private func pulseCycle() {
+        guard isAnimating else { return }
+
+        for (index, dot) in dotViews.enumerated() {
+            dot.alpha = 0.35
+            UIView.animate(
+                withDuration: 0.38,
+                delay: Double(index) * 0.14,
+                options: [.curveEaseInOut, .allowUserInteraction]
+            ) {
+                dot.alpha = 1
+            } completion: { [weak self, weak dot] finished in
+                guard finished, let self, let dot, self.isAnimating else { return }
+                UIView.animate(withDuration: 0.38, delay: 0.05, options: [.curveEaseInOut]) {
+                    dot.alpha = 0.35
+                }
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { [weak self] in
+            self?.pulseCycle()
+        }
+    }
+}
+
 final class SuggestionBarView: UIView {
     var onTapAccept: (() -> Void)?
 
+    private let contentStack = UIStackView()
+    private let ellipsis = AnimatedEllipsisView()
     private let label = UILabel()
-    private let spinner = UIActivityIndicatorView(style: .medium)
     private var canAccept = false
+    private var displayedState: TranslationSuggester.SuggestionState = .idle
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -331,26 +418,30 @@ final class SuggestionBarView: UIView {
         label.lineBreakMode = .byTruncatingTail
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.7
+        label.numberOfLines = 1
 
-        spinner.transform = CGAffineTransform(scaleX: 0.65, y: 0.65)
-        spinner.hidesWhenStopped = true
-        spinner.color = KeyboardPalette.secondaryLabel
+        ellipsis.setContentHuggingPriority(.required, for: .horizontal)
+        ellipsis.setContentCompressionResistancePriority(.required, for: .horizontal)
 
-        let stack = UIStackView(arrangedSubviews: [spinner, label])
-        stack.axis = .horizontal
-        stack.alignment = .center
-        stack.spacing = 6
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
+        contentStack.axis = .horizontal
+        contentStack.alignment = .center
+        contentStack.spacing = 8
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        contentStack.addArrangedSubview(ellipsis)
+        contentStack.addArrangedSubview(label)
+        addSubview(contentStack)
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
+            contentStack.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 12),
+            contentStack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -12),
+            contentStack.centerXAnchor.constraint(equalTo: centerXAnchor),
+            contentStack.centerYAnchor.constraint(equalTo: centerYAnchor),
+            contentStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12).withPriority(.defaultHigh),
+            contentStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12).withPriority(.defaultHigh),
         ])
 
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap)))
-        apply(.idle)
+        apply(.idle, animated: false)
     }
 
     @available(*, unavailable)
@@ -360,45 +451,115 @@ final class SuggestionBarView: UIView {
 
     func refreshColors() {
         backgroundColor = .clear
-        spinner.color = KeyboardPalette.secondaryLabel
+        ellipsis.refreshColors()
     }
 
     func apply(_ state: TranslationSuggester.SuggestionState) {
+        apply(state, animated: state != displayedState)
+    }
+
+    private func apply(_ state: TranslationSuggester.SuggestionState, animated: Bool) {
+        let stateChanged = state != displayedState
+        displayedState = state
+
+        let shouldAnimate = animated && stateChanged && state != .idle
+
+        guard shouldAnimate else {
+            render(state)
+            return
+        }
+
+        UIView.transition(
+            with: contentStack,
+            duration: 0.22,
+            options: [.transitionCrossDissolve, .allowUserInteraction]
+        ) {
+            self.render(state)
+        }
+
+        if case .ready = state {
+            label.transform = CGAffineTransform(scaleX: 0.97, y: 0.97)
+            UIView.animate(
+                withDuration: 0.28,
+                delay: 0,
+                usingSpringWithDamping: 0.82,
+                initialSpringVelocity: 0.4
+            ) {
+                self.label.transform = .identity
+            }
+        }
+    }
+
+    private func render(_ state: TranslationSuggester.SuggestionState) {
         canAccept = false
         label.textColor = KeyboardPalette.label
         label.font = .systemFont(ofSize: 17, weight: .regular)
+        ellipsis.isHidden = true
+        ellipsis.stopAnimating()
 
         switch state {
         case .idle:
-            spinner.stopAnimating()
-            label.text = nil
+            label.text = "Type Singlish — tap suggestion for English"
+            label.textColor = KeyboardPalette.tertiaryLabel
+            label.font = .systemFont(ofSize: 14, weight: .regular)
 
         case .needsFullAccess:
-            spinner.stopAnimating()
-            label.text = "Allow Full Access"
+            label.text = "Turn on Full Access to translate"
             label.textColor = KeyboardPalette.secondaryLabel
             label.font = .systemFont(ofSize: 15, weight: .regular)
 
-        case .loading:
-            spinner.startAnimating()
-            label.text = nil
+        case .loading(let phrase):
+            ellipsis.isHidden = false
+            ellipsis.startAnimating()
+            label.text = Self.loadingMessage(for: phrase)
+            label.textColor = KeyboardPalette.secondaryLabel
+            label.font = .systemFont(ofSize: 15, weight: .regular)
 
         case .ready(_, let translation):
-            spinner.stopAnimating()
             canAccept = true
             label.text = translation.translation
 
         case .failed(_, let message):
-            spinner.stopAnimating()
-            label.text = message
+            label.text = Self.friendlyFailureMessage(message)
             label.textColor = KeyboardPalette.secondaryLabel
             label.font = .systemFont(ofSize: 14, weight: .regular)
         }
     }
 
+    private static func loadingMessage(for phrase: String) -> String {
+        let trimmed = phrase.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "Finding the right English" }
+
+        if trimmed.count <= 22 {
+            return "“\(trimmed)” → English"
+        }
+        return "Translating your Singlish"
+    }
+
+    private static func friendlyFailureMessage(_ message: String) -> String {
+        let lower = message.lowercased()
+        if lower.contains("rate limit") || lower.contains("too many") {
+            return "Slow down a bit — try again soon"
+        }
+        if lower.contains("timeout") || lower.contains("timed out") {
+            return "Taking too long — try again"
+        }
+        if lower.contains("network") || lower.contains("internet") || lower.contains("offline") {
+            return "No connection — check your network"
+        }
+        return "Couldn't translate — try again"
+    }
+
     @objc private func handleTap() {
         guard canAccept else { return }
         onTapAccept?()
+    }
+}
+
+private extension NSLayoutConstraint {
+    func withPriority(_ priority: UILayoutPriority) -> NSLayoutConstraint {
+        self.priority = priority
+        return self
     }
 }
 
@@ -501,4 +662,12 @@ enum KeyboardPalette {
     }
 
     static var secondaryLabel: UIColor { .secondaryLabel }
+
+    static var tertiaryLabel: UIColor {
+        UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor.white.withAlphaComponent(0.42)
+                : UIColor.black.withAlphaComponent(0.38)
+        }
+    }
 }

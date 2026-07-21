@@ -24,7 +24,8 @@
 
 ```
 SayWell/                    # local workspace (iOS git root)
-├── PROJECT_LOG.md          # ← you are here
+├── PROJECT_LOG.md          # ← you are here (history + current facts)
+├── FUTURE_PLANS.md         # planned UX/features + implementation notes
 ├── README.md               # workspace overview
 ├── ios/                    # tracked by github.com/sooriyo/SayWell
 │   ├── SayWell/            # host SwiftUI app
@@ -150,3 +151,9 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **Cost reduction strategy documented** in README: three-tier (builtin → cache → Gemini), manual miss-log mining for continuous improvement.
 - **API contract note:** `/translate` response `source` field now includes `"builtin"` (additive, no breaking changes).
 - Committed as `b94063d`.
+
+### 2026-07-21 — Future plans roadmap doc
+**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 10:19AM
+- Added `FUTURE_PLANS.md` — tiered UX/feature roadmap for agents (tone, alternatives, history, keyboard polish, etc.)
+- Cross-linked from `PROJECT_LOG.md` workspace layout and root `README.md`
+- **Rule:** ship features → log in `PROJECT_LOG.md`; update or remove from `FUTURE_PLANS.md`
