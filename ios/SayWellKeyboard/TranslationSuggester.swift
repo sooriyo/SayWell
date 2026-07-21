@@ -65,6 +65,19 @@ final class TranslationSuggester {
             return
         }
 
+        if let downloaded = CommonPhrasesStore.lookup(phrase: trimmed) {
+            let response = TranslationResponse(
+                translation: downloaded,
+                source: .builtin,
+                normalized: trimmed
+            )
+            memoryCache[trimmed.lowercased()] = response
+            LocalPhraseCache.record(phrase: trimmed, response: response)
+            lastRequested = trimmed
+            onUpdate?(.ready(phrase: trimmed, translation: response))
+            return
+        }
+
         debounceTask?.cancel()
         debounceTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: self?.debounceNanoseconds ?? 700_000_000)

@@ -76,11 +76,25 @@ final class TranslationViewModel {
             return
         }
 
-        // Check the persisted cache first — if we have it, skip the network entirely.
+        // Check the personal phrase cache first — if we have it, skip the network entirely.
         if let cached = LocalPhraseCache.lookup(phrase: text) {
             translation = cached
             LocalPhraseCache.record(phrase: text, response: cached)
             TranslationHistoryStore.record(singlish: text, response: cached)
+            reloadHistory()
+            Haptics.notify(.success)
+            return
+        }
+
+        // Check the downloaded common phrases (offline!) — if we have it, skip the network.
+        if let downloaded = CommonPhrasesStore.lookup(phrase: text) {
+            translation = TranslationResponse(
+                translation: downloaded,
+                source: .builtin,
+                normalized: text
+            )
+            LocalPhraseCache.record(phrase: text, response: translation!)
+            TranslationHistoryStore.record(singlish: text, response: translation!)
             reloadHistory()
             Haptics.notify(.success)
             return
@@ -179,6 +193,33 @@ final class TranslationViewModel {
         errorMessage = nil
         translation = nil
         didCopy = false
+    }
+
+    // MARK: - Common Phrases Management (Smart Syncing)
+
+    /// Manually trigger a sync of common phrases from backend (ignores 24-hour throttle).
+    func syncCommonPhrases() async -> Bool {
+        return await CommonPhrasesStore.syncIfNeeded()
+    }
+
+    /// Clear downloaded common phrases cache.
+    func clearCommonPhrases() {
+        CommonPhrasesStore.clear()
+    }
+
+    /// Number of downloaded common phrases available offline.
+    var commonPhrasesCount: Int {
+        CommonPhrasesStore.phraseCount
+    }
+
+    /// Local version of downloaded common phrases.
+    var commonPhrasesVersion: String? {
+        CommonPhrasesStore.localVersion
+    }
+
+    /// When common phrases were last downloaded.
+    var commonPhrasesLastDownloaded: Date? {
+        CommonPhrasesStore.lastDownloadedAt
     }
 }
 

@@ -43,6 +43,9 @@ struct ContentView: View {
                         if viewModel.cachedPhraseCount > 0 {
                             cachedPhrasesSection
                         }
+                        if viewModel.commonPhrasesCount > 0 {
+                            commonPhrasesSection
+                        }
                         keyboardSetupSection
                             .id("keyboard")
                     }
@@ -92,7 +95,13 @@ struct ContentView: View {
         }
         .preferredColorScheme(.light)
         .animation(.spring(response: 0.35, dampingFraction: 0.86), value: viewModel.phase)
-        .onAppear(perform: refreshKeyboardStatus)
+        .onAppear {
+            refreshKeyboardStatus()
+            // Sync common phrases on app launch (background, non-blocking)
+            Task {
+                _ = await viewModel.syncCommonPhrases()
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             refreshKeyboardStatus()
         }
@@ -343,6 +352,38 @@ struct ContentView: View {
                     .font(.system(.caption2, design: .rounded).weight(.medium))
                     .foregroundStyle(SayWellTheme.lagoon.opacity(0.55))
                 Button("Clear", action: viewModel.clearLocalPhraseCache)
+                    .font(.system(.caption2, design: .rounded).weight(.semibold))
+                    .foregroundStyle(SayWellTheme.lagoon.opacity(0.7))
+            }
+        }
+        .padding(.top, -20)
+    }
+
+    private var commonPhrasesSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Common phrases (offline)")
+                        .font(.system(.caption2, design: .rounded).weight(.semibold))
+                        .foregroundStyle(SayWellTheme.lagoon.opacity(0.65))
+                    if let lastDownloaded = viewModel.commonPhrasesLastDownloaded {
+                        Text("Updated: \(lastDownloaded.formatted(date: .abbreviated, time: .omitted))")
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(SayWellTheme.lagoon.opacity(0.4))
+                    }
+                }
+                Spacer()
+                Text("\(viewModel.commonPhrasesCount)")
+                    .font(.system(.caption2, design: .rounded).weight(.medium))
+                    .foregroundStyle(SayWellTheme.lagoon.opacity(0.55))
+                Button("Refresh") {
+                    Task {
+                        _ = await viewModel.syncCommonPhrases()
+                    }
+                }
+                .font(.system(.caption2, design: .rounded).weight(.semibold))
+                .foregroundStyle(SayWellTheme.lagoon.opacity(0.7))
+                Button("Clear", action: viewModel.clearCommonPhrases)
                     .font(.system(.caption2, design: .rounded).weight(.semibold))
                     .foregroundStyle(SayWellTheme.lagoon.opacity(0.7))
             }

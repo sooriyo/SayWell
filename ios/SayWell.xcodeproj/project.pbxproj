@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		03A41D4C3CC1F74458B499CD /* CommonPhrasesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */; };
 		0E08EF70668644FAE020260D /* DeviceIDStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */; };
 		153D9836CAC98CC0F8311E3C /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66042E156175D4B72AB125DD /* KeyboardViewController.swift */; };
 		16C14084C6118E3E41189DD5 /* SayWellKeyboard.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 13384F357F07A00CBA941FBB /* SayWellKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1952CFF101FF8DB150F81E7E /* FloatingNavBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9F1C1F35006D2F501CB4BC /* FloatingNavBar.swift */; };
 		1AD1A2880C32CC551385F6A8 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
+		1C7B86A291A38EFAA18300CC /* CommonPhrasesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */; };
 		3BD1A2F765BF0D34C39F6612 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
 		474E93F9F1F0546C283A01B5 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
 		4AE8FD04DCFD7BA1984FB696 /* TranslationHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */; };
@@ -63,6 +65,7 @@
 		1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationViewModel.swift; sourceTree = "<group>"; };
 		2A162156330BB6482195590D /* TranslationComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationComponents.swift; sourceTree = "<group>"; };
 		2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIDStore.swift; sourceTree = "<group>"; };
+		62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonPhrasesStore.swift; sourceTree = "<group>"; };
 		66042E156175D4B72AB125DD /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
 		77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationModels.swift; sourceTree = "<group>"; };
 		79D8AD5124A7F60AA47909E6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -124,6 +127,7 @@
 		8030A70D350469CB53AB0CFA /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */,
 				2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */,
 				B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */,
 				D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */,
@@ -260,6 +264,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03A41D4C3CC1F74458B499CD /* CommonPhrasesStore.swift in Sources */,
 				EEFCE895C48909945C474993 /* ContentView.swift in Sources */,
 				0E08EF70668644FAE020260D /* DeviceIDStore.swift in Sources */,
 				1952CFF101FF8DB150F81E7E /* FloatingNavBar.swift in Sources */,
@@ -281,6 +286,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1C7B86A291A38EFAA18300CC /* CommonPhrasesStore.swift in Sources */,
 				A57727E7C3891B132A1FDD9F /* DeviceIDStore.swift in Sources */,
 				9F5B9891A5829C55BDBB20DA /* KeyboardStatusStore.swift in Sources */,
 				509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */,
