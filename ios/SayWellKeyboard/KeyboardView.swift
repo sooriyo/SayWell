@@ -92,8 +92,11 @@ final class SayWellKeyboardView: UIView {
     }
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        print("🎹 [HITTEST CALLED] point=\(point)")
+
         // First, try the normal hit-test (suggestion bar, previews, etc.)
         if let view = super.hitTest(point, with: event), view !== self {
+            print("🎹 [HITTEST] Normal hit returned: \(type(of: view))")
             return view
         }
 
