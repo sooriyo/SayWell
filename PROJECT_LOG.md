@@ -191,12 +191,14 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Committed as `64e67fd` (fix) + `c2c944d` (debounce).
 - Added **Current focus** section here for agent handoff
 
-### 2026-07-21 — Fix 5 bugs: date decoding, cache, timeouts, timestamps, deletion
-**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 12:50PM
+### 2026-07-21 — Fix 7 bugs: date decoding, cache, timeouts, timestamps, deletion, API bloat, punctuation
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 1:07PM
 - **#1 JSONDecoder missing .iso8601 strategy** — CommonPhrasesStore.fetchRemoteMetadata() now decodes ISO 8601 dates; metadata sync was silently failing
 - **#2 Memory cache eviction broken** — TranslationSuggester cleared all 64 entries on overflow instead of LRU evicting one; now removes only oldest entry, preserving frequent phrases
 - **#3 No network timeout on common phrases sync** — URLSession now configured with 10s request + 15s resource timeout (was unbounded, could hang app startup)
 - **#4 Hardcoded metadata timestamps not synced** — Backend handlers required dual manual updates; refactored to share `getCommonPhrasesMetadata()` (single source of truth for version, lastUpdated, count, size)
 - **#5 Keyboard deletion count mismatch** — TranslationSuggester.currentPhrase() returned trimmed phrase but insertTranslation() deleted based on trimmed count, leaving punctuation. Now KeyboardPhrase tracks actual character count separately
-- iOS: builds successfully, keyboard & host app working. Backend: typecheck + 14/14 tests pass
-- Committed iOS as `162c49b`, backend as `bb7c337`
+- **#6 Duplicate API request after tap** — insertTranslation() was calling refreshSuggestion(), extracting English text as new Singlish input. Now only resets suggester; suggestion reappears when user types new Singlish
+- **#7 Punctuation semantics lost** — normalize() stripped all punctuation, so "oyata kohomada?" (question) and "oyata kohomada" (statement) got same translation. Now preserves sentence-ending `?` `!` `.` as separate tokens for semantic meaning
+- iOS: builds successfully. Backend: typecheck + 14/14 tests pass
+- Commits: iOS `8ceb9b8`, backend `1b6a2d7`
