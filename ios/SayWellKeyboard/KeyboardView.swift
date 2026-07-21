@@ -64,16 +64,23 @@ final class SayWellKeyboardView: UIView {
     private let topKeysInset: CGFloat = 6
     private let bottomInset: CGFloat = 6
 
+    /// Keyboard extensions drop touches on fully transparent pixels before hit-testing.
+    private static let touchTrapColor = UIColor.white.withAlphaComponent(0.01)
+
     /// Tight height: suggestion(36) + gap(6) + 4×42 keys + 3×10 gaps + bottom(6).
     static let preferredHeight: CGFloat = 246
+
+    /// Key currently tracked by the keyboard-level touch engine.
+    private weak var activeKey: KeyButton?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         print("🎹 [INIT] SayWellKeyboardView initialized")
-        // Native keyboard is translucent glass — no solid fill.
-        backgroundColor = .clear
+        // Must not be .clear — transparent gap pixels never receive touches in extensions.
+        backgroundColor = Self.touchTrapColor
         isOpaque = false
         clipsToBounds = false
+        isMultipleTouchEnabled = false
         buildChrome()
         rebuildKeys()
         registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: SayWellKeyboardView, _) in
@@ -93,46 +100,89 @@ final class SayWellKeyboardView: UIView {
     }
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        print("🎹 [HITTEST CALLED] point=\(point)")
-
-        // First, try the normal hit-test (suggestion bar, previews, etc.)
-        if let view = super.hitTest(point, with: event), view !== self {
-            print("🎹 [HITTEST] Normal hit returned: \(type(of: view))")
-            return view
+        guard isUserInteractionEnabled, !isHidden, alpha > 0.01, bounds.contains(point) else {
+            return nil
         }
 
-        // If no view hit, find the closest key button (native keyboard behavior)
-        var closestButton: KeyButton?
-        var closestDistance = CGFloat.infinity
-        var buttonCount = 0
+        let suggestionPoint = convert(point, to: suggestionBar)
+        if suggestionBar.bounds.contains(suggestionPoint),
+           let suggestionHit = suggestionBar.hitTest(suggestionPoint, with: event) {
+            return suggestionHit
+        }
 
-        func findClosestButton(in view: UIView) {
+        if keyArea.contains(point) {
+            return self
+        }
+
+        return super.hitTest(point, with: event)
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        pressKey(closestKeyButton(to: touch.location(in: self)))
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let next = closestKeyButton(to: touch.location(in: self))
+        guard next !== activeKey else { return }
+        pressKey(next)
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        releaseActiveKey(commit: true)
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        releaseActiveKey(commit: false)
+    }
+
+    private var keyArea: CGRect {
+        rowsStack.frame.insetBy(dx: -sideInset, dy: -(rowSpacing / 2))
+    }
+
+    private func pressKey(_ key: KeyButton?) {
+        if activeKey === key { return }
+        activeKey?.setPressed(false)
+        activeKey = key
+        key?.setPressed(true)
+    }
+
+    private func releaseActiveKey(commit: Bool) {
+        let key = activeKey
+        activeKey = nil
+        key?.setPressed(false)
+        if commit {
+            key?.onTap?()
+        }
+    }
+
+    private func closestKeyButton(to point: CGPoint) -> KeyButton? {
+        guard keyArea.contains(point) else { return nil }
+
+        var closest: KeyButton?
+        var closestDistance = CGFloat.infinity
+
+        func visit(_ view: UIView) {
             for subview in view.subviews {
                 if let button = subview as? KeyButton {
-                    buttonCount += 1
-                    // Convert button's center from its coordinate system to self's
-                    let buttonCenter = CGPoint(x: button.bounds.midX, y: button.bounds.midY)
-                    let buttonCenterInSelf = convert(buttonCenter, from: button)
-                    let distance = hypot(point.x - buttonCenterInSelf.x, point.y - buttonCenterInSelf.y)
+                    let center = convert(
+                        CGPoint(x: button.bounds.midX, y: button.bounds.midY),
+                        from: button
+                    )
+                    let distance = hypot(point.x - center.x, point.y - center.y)
                     if distance < closestDistance {
                         closestDistance = distance
-                        closestButton = button
+                        closest = button
                     }
                 } else {
-                    findClosestButton(in: subview)
+                    visit(subview)
                 }
             }
         }
 
-        findClosestButton(in: self)
-
-        if let button = closestButton {
-            print("🎹 hitTest: Found \(buttonCount) buttons, closest at distance \(closestDistance)")
-            return button
-        } else {
-            print("🎹 hitTest: No buttons found (found \(buttonCount) buttons)")
-            return nil
-        }
+        visit(rowsStack)
+        return closest
     }
 
     func apply(suggestion: TranslationSuggester.SuggestionState) {
@@ -202,6 +252,7 @@ final class SayWellKeyboardView: UIView {
         rowsStack.distribution = .fill
         rowsStack.translatesAutoresizingMaskIntoConstraints = false
         rowsStack.clipsToBounds = false
+        rowsStack.backgroundColor = Self.touchTrapColor
 
         addSubview(suggestionBar)
         addSubview(rowsStack)
@@ -221,6 +272,7 @@ final class SayWellKeyboardView: UIView {
     }
 
     private func rebuildKeys() {
+        releaseActiveKey(commit: false)
         keyPreview.dismiss(animated: false)
         rowsStack.arrangedSubviews.forEach {
             rowsStack.removeArrangedSubview($0)
@@ -253,23 +305,25 @@ final class SayWellKeyboardView: UIView {
         letters.spacing = keySpacing
         letters.alignment = .fill
         letters.distribution = .fillEqually
+        letters.backgroundColor = Self.touchTrapColor
 
         for raw in characters {
             let insert = insertValue(for: raw)
             let button = KeyButton(style: .letter)
             button.setTitle(displayTitle(for: raw), for: .normal)
             wireKeyPreview(for: button)
-            button.addAction(UIAction { [weak self] _ in
+            button.onTap = { [weak self] in
                 guard let self else { return }
                 self.delegate?.keyboardView(self, didTapKey: .character(insert))
                 self.consumeShiftAfterCharacter()
-            }, for: .touchUpInside)
+            }
             letters.addArrangedSubview(button)
         }
 
         if layout == .letters, rowIndex == 1 {
             let wrapper = UIStackView()
             wrapper.axis = .horizontal
+            wrapper.backgroundColor = Self.touchTrapColor
             wrapper.addArrangedSubview(flexibleSpacer(18))
             wrapper.addArrangedSubview(letters)
             wrapper.addArrangedSubview(flexibleSpacer(18))
@@ -282,6 +336,7 @@ final class SayWellKeyboardView: UIView {
             row.spacing = keySpacing
             row.alignment = .fill
             row.distribution = .fill
+            row.backgroundColor = Self.touchTrapColor
 
             switch layout {
             case .letters:
@@ -291,10 +346,10 @@ final class SayWellKeyboardView: UIView {
                 if shiftEnabled || shiftLocked {
                     shift.setActionHighlighted(true)
                 }
-                shift.addAction(UIAction { [weak self] _ in
+                shift.onTap = { [weak self] in
                     guard let self else { return }
                     self.delegate?.keyboardView(self, didTapKey: .shift)
-                }, for: .touchUpInside)
+                }
                 shift.widthAnchor.constraint(equalToConstant: 42).isActive = true
                 row.addArrangedSubview(shift)
 
@@ -302,10 +357,10 @@ final class SayWellKeyboardView: UIView {
                 let symbols = KeyButton(style: .action)
                 symbols.setTitle("#+=", for: .normal)
                 symbols.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
-                symbols.addAction(UIAction { [weak self] _ in
+                symbols.onTap = { [weak self] in
                     guard let self else { return }
                     self.delegate?.keyboardView(self, didTapKey: .symbolsToggle)
-                }, for: .touchUpInside)
+                }
                 symbols.widthAnchor.constraint(equalToConstant: 42).isActive = true
                 row.addArrangedSubview(symbols)
 
@@ -313,10 +368,10 @@ final class SayWellKeyboardView: UIView {
                 let numbers = KeyButton(style: .action)
                 numbers.setTitle("123", for: .normal)
                 numbers.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
-                numbers.addAction(UIAction { [weak self] _ in
+                numbers.onTap = { [weak self] in
                     guard let self else { return }
                     self.delegate?.keyboardView(self, didTapKey: .symbolsToggle)
-                }, for: .touchUpInside)
+                }
                 numbers.widthAnchor.constraint(equalToConstant: 42).isActive = true
                 row.addArrangedSubview(numbers)
             }
@@ -325,10 +380,10 @@ final class SayWellKeyboardView: UIView {
 
             let delete = KeyButton(style: .action)
             delete.setSymbol(systemName: "delete.left", pointSize: 16)
-            delete.addAction(UIAction { [weak self] _ in
+            delete.onTap = { [weak self] in
                 guard let self else { return }
                 self.delegate?.keyboardView(self, didTapKey: .backspace)
-            }, for: .touchUpInside)
+            }
             delete.widthAnchor.constraint(equalToConstant: 42).isActive = true
             row.addArrangedSubview(delete)
             return row
@@ -343,45 +398,46 @@ final class SayWellKeyboardView: UIView {
         stack.spacing = keySpacing
         stack.alignment = .fill
         stack.distribution = .fill
+        stack.backgroundColor = Self.touchTrapColor
 
         let layoutKey = KeyButton(style: .action)
         layoutKey.setTitle(layout == .letters ? "123" : "ABC", for: .normal)
         layoutKey.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
         layoutKey.widthAnchor.constraint(equalToConstant: 42).isActive = true
-        layoutKey.addAction(UIAction { [weak self] _ in
+        layoutKey.onTap = { [weak self] in
             guard let self else { return }
             self.delegate?.keyboardView(self, didTapKey: .layoutToggle)
-        }, for: .touchUpInside)
+        }
         stack.addArrangedSubview(layoutKey)
 
         if showsGlobe {
             let globe = KeyButton(style: .action)
             globe.setSymbol(systemName: "globe", pointSize: 16)
             globe.widthAnchor.constraint(equalToConstant: 42).isActive = true
-            globe.addAction(UIAction { [weak self] _ in
+            globe.onTap = { [weak self] in
                 guard let self else { return }
                 self.delegate?.keyboardView(self, didTapKey: .globe)
-            }, for: .touchUpInside)
+            }
             stack.addArrangedSubview(globe)
         }
 
         let emoji = KeyButton(style: .action)
         emoji.setSymbol(systemName: "face.smiling", pointSize: 16)
         emoji.widthAnchor.constraint(equalToConstant: 42).isActive = true
-        emoji.addAction(UIAction { [weak self] _ in
+        emoji.onTap = { [weak self] in
             guard let self else { return }
             self.delegate?.keyboardView(self, didTapKey: .emoji)
-        }, for: .touchUpInside)
+        }
         stack.addArrangedSubview(emoji)
 
         let space = KeyButton(style: .space)
         space.setTitle("space", for: .normal)
         space.titleLabel?.font = .systemFont(ofSize: 15, weight: .regular)
         space.setTitleColor(KeyboardPalette.secondaryLabel, for: .normal)
-        space.addAction(UIAction { [weak self] _ in
+        space.onTap = { [weak self] in
             guard let self else { return }
             self.delegate?.keyboardView(self, didTapKey: .space)
-        }, for: .touchUpInside)
+        }
         stack.addArrangedSubview(space)
 
         let ret = KeyButton(style: usesBlueReturn ? .returnKey : .action)
@@ -392,10 +448,10 @@ final class SayWellKeyboardView: UIView {
             ret.setSymbol(systemName: "return.left", pointSize: 16)
         }
         ret.widthAnchor.constraint(equalToConstant: usesBlueReturn ? 88 : 88).isActive = true
-        ret.addAction(UIAction { [weak self] _ in
+        ret.onTap = { [weak self] in
             guard let self else { return }
             self.delegate?.keyboardView(self, didTapKey: .returnKey)
-        }, for: .touchUpInside)
+        }
         stack.addArrangedSubview(ret)
 
         return stack
@@ -430,6 +486,8 @@ final class SayWellKeyboardView: UIView {
 
     private func flexibleSpacer(_ width: CGFloat) -> UIView {
         let view = UIView()
+        view.isUserInteractionEnabled = false
+        view.backgroundColor = Self.touchTrapColor
         view.translatesAutoresizingMaskIntoConstraints = false
         view.widthAnchor.constraint(equalToConstant: width).isActive = true
         return view
@@ -552,7 +610,7 @@ final class SuggestionBarView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .clear
+        backgroundColor = UIColor.white.withAlphaComponent(0.01)
         isOpaque = false
 
         label.font = .systemFont(ofSize: 17, weight: .regular)
@@ -593,7 +651,7 @@ final class SuggestionBarView: UIView {
     }
 
     func refreshColors() {
-        backgroundColor = .clear
+        backgroundColor = UIColor.white.withAlphaComponent(0.01)
         ellipsis.refreshColors()
     }
 
@@ -733,6 +791,8 @@ final class KeyButton: UIButton {
 
     private let style: Style
     private var isActionHighlighted = false
+
+    var onTap: (() -> Void)?
     var onBeginPreview: (() -> Void)?
     var onEndPreview: (() -> Void)?
 
@@ -766,7 +826,22 @@ final class KeyButton: UIButton {
         }
     }
 
+    func setPressed(_ pressed: Bool) {
+        if pressed {
+            applyPressedAppearance()
+            if style == .letter {
+                onBeginPreview?()
+            }
+        } else {
+            restoreAppearance()
+            if style == .letter {
+                onEndPreview?()
+            }
+        }
+    }
+
     private func configures() {
+        isUserInteractionEnabled = false
         titleLabel?.font = .systemFont(
             ofSize: style == .letter ? 22 : 16,
             weight: style == .letter ? .regular : .medium
@@ -775,9 +850,6 @@ final class KeyButton: UIButton {
         backgroundColor = styleBackground
         layer.cornerRadius = 5.5
         layer.masksToBounds = true
-
-        addTarget(self, action: #selector(touchDown), for: .touchDown)
-        addTarget(self, action: #selector(touchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel, .touchDragExit])
     }
 
     private var styleBackground: UIColor {
@@ -791,10 +863,10 @@ final class KeyButton: UIButton {
         }
     }
 
-    @objc private func touchDown() {
+    private func applyPressedAppearance() {
         switch style {
         case .letter:
-            break // preview bubble handles pressed visuals
+            break
         case .space:
             backgroundColor = KeyboardPalette.actionKey
         case .action:
@@ -802,16 +874,10 @@ final class KeyButton: UIButton {
         case .returnKey:
             backgroundColor = KeyboardPalette.returnKey.withAlphaComponent(0.85)
         }
-        if style == .letter {
-            onBeginPreview?()
-        }
     }
 
-    @objc private func touchUp() {
+    private func restoreAppearance() {
         backgroundColor = styleBackground
-        if style == .letter {
-            onEndPreview?()
-        }
     }
 }
 

@@ -11,8 +11,8 @@ final class KeyboardViewController: UIInputViewController {
         // Let Auto Layout own the keyboard height so we don't leave a tall empty
         // gray band covering the host app (the circled overlay).
         inputView?.allowsSelfSizing = true
-        // Kill any system-provided opaque fill so only our clear glass shows.
-        inputView?.backgroundColor = .clear
+        let touchTrap = UIColor.white.withAlphaComponent(0.01)
+        inputView?.backgroundColor = touchTrap
         inputView?.isOpaque = false
         inputView?.clipsToBounds = false
 
@@ -42,8 +42,8 @@ final class KeyboardViewController: UIInputViewController {
 
     private func setupKeyboard() {
         print("🎹 [SETUP] Setting up keyboard")
-        // Fully transparent — system provides the keyboard chrome/blur.
-        view.backgroundColor = .clear
+        let touchTrap = UIColor.white.withAlphaComponent(0.01)
+        view.backgroundColor = touchTrap
         view.isOpaque = false
         view.clipsToBounds = false
 
