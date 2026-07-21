@@ -105,7 +105,8 @@ final class SayWellKeyboardView: UIView {
             for subview in view.subviews {
                 if let button = subview as? KeyButton {
                     // Convert button's center from its coordinate system to self's
-                    let buttonCenterInSelf = convert(button.bounds.center, from: button)
+                    let buttonCenter = CGPoint(x: button.bounds.midX, y: button.bounds.midY)
+                    let buttonCenterInSelf = convert(buttonCenter, from: button)
                     let distance = hypot(point.x - buttonCenterInSelf.x, point.y - buttonCenterInSelf.y)
                     if distance < closestDistance {
                         closestDistance = distance
