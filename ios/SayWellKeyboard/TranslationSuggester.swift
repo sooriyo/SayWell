@@ -17,9 +17,9 @@ final class TranslationSuggester {
     enum SuggestionState: Equatable {
         case idle
         case needsFullAccess
-        case loading(phrase: String)
-        case ready(phrase: String, translation: TranslationResponse)
-        case failed(phrase: String, message: String)
+        case loading(phrase: String, charCount: Int)
+        case ready(phrase: String, charCount: Int, translation: TranslationResponse)
+        case failed(phrase: String, charCount: Int, message: String)
     }
 
     func cancel() {
@@ -35,7 +35,9 @@ final class TranslationSuggester {
         onUpdate?(.idle)
     }
 
-    func schedule(phrase: String, hasFullAccess: Bool) {
+    func schedule(phraseData: KeyboardPhrase, hasFullAccess: Bool) {
+        let phrase = phraseData.text
+        let charCount = phraseData.characterCount
         let trimmed = phrase.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard hasFullAccess else {
@@ -53,7 +55,7 @@ final class TranslationSuggester {
 
         if let cached = memoryCache[trimmed.lowercased()] {
             lastRequested = trimmed
-            onUpdate?(.ready(phrase: trimmed, translation: cached))
+            onUpdate?(.ready(phrase: trimmed, charCount: charCount, translation: cached))
             return
         }
 
@@ -61,7 +63,7 @@ final class TranslationSuggester {
             memoryCache[trimmed.lowercased()] = persisted
             LocalPhraseCache.record(phrase: trimmed, response: persisted)
             lastRequested = trimmed
-            onUpdate?(.ready(phrase: trimmed, translation: persisted))
+            onUpdate?(.ready(phrase: trimmed, charCount: charCount, translation: persisted))
             return
         }
 
@@ -74,7 +76,7 @@ final class TranslationSuggester {
             memoryCache[trimmed.lowercased()] = response
             LocalPhraseCache.record(phrase: trimmed, response: response)
             lastRequested = trimmed
-            onUpdate?(.ready(phrase: trimmed, translation: response))
+            onUpdate?(.ready(phrase: trimmed, charCount: charCount, translation: response))
             return
         }
 
@@ -82,15 +84,15 @@ final class TranslationSuggester {
         debounceTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: self?.debounceNanoseconds ?? 700_000_000)
             guard !Task.isCancelled else { return }
-            await self?.fetch(phrase: trimmed)
+            await self?.fetch(phrase: trimmed, charCount: charCount)
         }
     }
 
-    private func fetch(phrase: String) async {
+    private func fetch(phrase: String, charCount: Int) async {
         guard phrase != lastRequested || memoryCache[phrase.lowercased()] == nil else { return }
 
         requestTask?.cancel()
-        onUpdate?(.loading(phrase: phrase))
+        onUpdate?(.loading(phrase: phrase, charCount: charCount))
 
         let task = Task {
             do {
@@ -98,23 +100,26 @@ final class TranslationSuggester {
                 guard !Task.isCancelled else { return }
                 memoryCache[phrase.lowercased()] = result
                 if memoryCache.count > 64 {
-                    memoryCache.removeAll(keepingCapacity: true)
+                    if let oldestKey = memoryCache.keys.first {
+                        memoryCache.removeValue(forKey: oldestKey)
+                    }
                 }
                 LocalPhraseCache.record(phrase: phrase, response: result)
                 lastRequested = phrase
-                onUpdate?(.ready(phrase: phrase, translation: result))
+                onUpdate?(.ready(phrase: phrase, charCount: charCount, translation: result))
             } catch is CancellationError {
                 return
             } catch let error as URLError where error.code == .cancelled {
                 return
             } catch let error as SayWellError {
                 guard !Task.isCancelled else { return }
-                onUpdate?(.failed(phrase: phrase, message: error.localizedDescription))
+                onUpdate?(.failed(phrase: phrase, charCount: charCount, message: error.localizedDescription))
             } catch {
                 guard !Task.isCancelled else { return }
                 onUpdate?(
                     .failed(
                         phrase: phrase,
+                        charCount: charCount,
                         message: SayWellError.network(underlying: error).localizedDescription
                     )
                 )
@@ -126,28 +131,32 @@ final class TranslationSuggester {
     }
 }
 
+struct KeyboardPhrase {
+    let text: String
+    let characterCount: Int
+}
+
 enum KeyboardPhraseExtractor {
     /// Current Singlish phrase before the cursor — last sentence-ish segment.
-    /// Extracts text from the last sentence boundary to the cursor, stripping trailing punctuation.
-    static func currentPhrase(beforeCursor context: String?) -> String {
-        guard let context, !context.isEmpty else { return "" }
+    /// Returns both the trimmed phrase for lookup and the actual character count to delete.
+    static func currentPhrase(beforeCursor context: String?) -> KeyboardPhrase {
+        guard let context, !context.isEmpty else { return KeyboardPhrase(text: "", characterCount: 0) }
 
         // Find the last sentence-ending character (., !, ?, newline)
         let separators = CharacterSet(charactersIn: "\n.!?")
         let parts = context.components(separatedBy: separators)
 
-        // If split produced multiple parts, the last may be empty (if context ends with punctuation).
-        // Use the last non-empty part, or fall back to last part.
-        let candidate = parts.last ?? context
-        let trimmed = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Track the raw segment (before trimming) to calculate deletion count
+        var rawSegment = parts.last ?? context
+        var trimmed = rawSegment.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // If we got empty string and there are multiple parts, try the second-to-last
         // (handles case where sentence ends with punctuation: "oyata kohomada?" → "oyata kohomada")
         if trimmed.isEmpty, parts.count > 1 {
-            let secondLast = parts[parts.count - 2].trimmingCharacters(in: .whitespacesAndNewlines)
-            return secondLast
+            rawSegment = parts[parts.count - 2]
+            trimmed = rawSegment.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
-        return trimmed
+        return KeyboardPhrase(text: trimmed, characterCount: rawSegment.count)
     }
 }

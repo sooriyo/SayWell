@@ -582,18 +582,18 @@ final class SuggestionBarView: UIView {
             label.textColor = KeyboardPalette.secondaryLabel
             label.font = .systemFont(ofSize: 15, weight: .regular)
 
-        case .loading(let phrase):
+        case .loading(let phrase, _):
             ellipsis.isHidden = false
             ellipsis.startAnimating()
             label.text = Self.loadingMessage(for: phrase)
             label.textColor = KeyboardPalette.secondaryLabel
             label.font = .systemFont(ofSize: 15, weight: .regular)
 
-        case .ready(_, let translation):
+        case .ready(_, _, let translation):
             canAccept = true
             label.text = translation.translation
 
-        case .failed(_, let message):
+        case .failed(_, _, let message):
             label.text = Self.friendlyFailureMessage(message)
             label.textColor = KeyboardPalette.secondaryLabel
             label.font = .systemFont(ofSize: 14, weight: .regular)

@@ -81,10 +81,10 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     private func refreshSuggestion() {
-        let phrase = KeyboardPhraseExtractor.currentPhrase(
+        let phraseData = KeyboardPhraseExtractor.currentPhrase(
             beforeCursor: textDocumentProxy.documentContextBeforeInput
         )
-        suggester.schedule(phrase: phrase, hasFullAccess: hasFullAccess)
+        suggester.schedule(phraseData: phraseData, hasFullAccess: hasFullAccess)
     }
 
     private func updateReturnKey() {
@@ -107,11 +107,11 @@ final class KeyboardViewController: UIInputViewController {
         }
     }
 
-    private func insertTranslation(_ english: String, replacing phrase: String) {
+    private func insertTranslation(_ english: String, replacingPhrase phrase: String, charCount: Int) {
         guard !english.isEmpty else { return }
 
-        if !phrase.isEmpty {
-            for _ in phrase {
+        if charCount > 0 {
+            for _ in 0..<charCount {
                 textDocumentProxy.deleteBackward()
             }
         }
@@ -148,8 +148,8 @@ extension KeyboardViewController: SayWellKeyboardViewDelegate {
         case .emoji:
             advanceToNextInputMode()
         case .acceptSuggestion:
-            if case let .ready(phrase, translation) = view.currentSuggestion {
-                insertTranslation(translation.translation, replacing: phrase)
+            if case let .ready(phrase, charCount, translation) = view.currentSuggestion {
+                insertTranslation(translation.translation, replacingPhrase: phrase, charCount: charCount)
             }
         }
     }

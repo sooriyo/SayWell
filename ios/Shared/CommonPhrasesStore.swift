@@ -30,6 +30,13 @@ enum CommonPhrasesStore {
     private static let decoder = JSONDecoder()
     private static let encoder = JSONEncoder()
 
+    private static var urlSession: URLSession {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10
+        config.timeoutIntervalForResource = 15
+        return URLSession(configuration: config)
+    }
+
     // MARK: - Local Storage
 
     /// Load locally stored common phrases bundle (if any).
@@ -86,9 +93,10 @@ enum CommonPhrasesStore {
     /// Fetch version metadata from backend (lightweight: ~100 bytes).
     static func fetchRemoteMetadata() async throws -> CommonPhrasesMetadata {
         let url = URL(string: "https://saywell-backend.saywell.workers.dev/api/common-phrases/meta")!
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await urlSession.data(from: url)
 
         let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
         let response = try decoder.decode(CommonPhrasesMetadata.self, from: data)
         return response
     }
@@ -96,7 +104,7 @@ enum CommonPhrasesStore {
     /// Fetch full common phrases bundle from backend (~10KB).
     static func fetchRemoteFull() async throws -> CommonPhrasesBundle {
         let url = URL(string: "https://saywell-backend.saywell.workers.dev/api/common-phrases/full")!
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await urlSession.data(from: url)
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
