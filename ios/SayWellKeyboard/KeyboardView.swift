@@ -100,10 +100,12 @@ final class SayWellKeyboardView: UIView {
         // If no view hit, find the closest key button (native keyboard behavior)
         var closestButton: KeyButton?
         var closestDistance = CGFloat.infinity
+        var buttonCount = 0
 
         func findClosestButton(in view: UIView) {
             for subview in view.subviews {
                 if let button = subview as? KeyButton {
+                    buttonCount += 1
                     // Convert button's center from its coordinate system to self's
                     let buttonCenter = CGPoint(x: button.bounds.midX, y: button.bounds.midY)
                     let buttonCenterInSelf = convert(buttonCenter, from: button)
@@ -119,7 +121,14 @@ final class SayWellKeyboardView: UIView {
         }
 
         findClosestButton(in: self)
-        return closestButton
+
+        if let button = closestButton {
+            print("🎹 hitTest: Found \(buttonCount) buttons, closest at distance \(closestDistance)")
+            return button
+        } else {
+            print("🎹 hitTest: No buttons found (found \(buttonCount) buttons)")
+            return nil
+        }
     }
 
     func apply(suggestion: TranslationSuggester.SuggestionState) {
