@@ -13,6 +13,9 @@ settings:
     # Apple Development: tharukaravisara@gmail.com
     DEVELOPMENT_TEAM: B2FR24RN8D
     CODE_SIGN_STYLE: Automatic
+    # Xcode “Update to recommended settings” (Jul 21, 2026)
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    STRING_CATALOG_GENERATE_SYMBOLS: YES
 
 schemes:
   SayWell:

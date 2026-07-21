@@ -57,6 +57,14 @@ final class TranslationSuggester {
             return
         }
 
+        if let persisted = LocalPhraseCache.lookup(phrase: trimmed) {
+            memoryCache[trimmed.lowercased()] = persisted
+            LocalPhraseCache.record(phrase: trimmed, response: persisted)
+            lastRequested = trimmed
+            onUpdate?(.ready(phrase: trimmed, translation: persisted))
+            return
+        }
+
         debounceTask?.cancel()
         debounceTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: self?.debounceNanoseconds ?? 700_000_000)
@@ -79,6 +87,7 @@ final class TranslationSuggester {
                 if memoryCache.count > 64 {
                     memoryCache.removeAll(keepingCapacity: true)
                 }
+                LocalPhraseCache.record(phrase: phrase, response: result)
                 lastRequested = phrase
                 onUpdate?(.ready(phrase: phrase, translation: result))
             } catch is CancellationError {

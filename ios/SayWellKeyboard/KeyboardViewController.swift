@@ -22,6 +22,7 @@ final class KeyboardViewController: UIInputViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        KeyboardStatusStore.recordKeyboardActive(hasFullAccess: hasFullAccess)
         keyboardView.setNeedsInputModeSwitchKey(needsInputModeSwitchKey)
         updateHeight()
         refreshSuggestion()

@@ -157,3 +157,11 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Added `FUTURE_PLANS.md` — tiered UX/feature roadmap for agents (tone, alternatives, history, keyboard polish, etc.)
 - Cross-linked from `PROJECT_LOG.md` workspace layout and root `README.md`
 - **Rule:** ship features → log in `PROJECT_LOG.md`; update or remove from `FUTURE_PLANS.md`
+
+### 2026-07-21 — iOS build fix + keyboard status & history
+**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 10:31AM
+- Fixed missing `KeyboardStatusStore.swift` and `RecentTranslationsSection.swift` (referenced in Xcode but never on disk)
+- Keyboard writes Full Access heartbeat to App Group; host shows **Keyboard is ready** card when set up
+- Recent translations section (last 8); tap to re-translate
+- `TranslationSource` now `Codable` + `builtin` for backend builtin phrases
+- Xcode recommended settings applied: user script sandboxing + string catalog symbol generation (also in `project.yml`)

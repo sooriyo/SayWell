@@ -7,6 +7,8 @@ struct ContentView: View {
     @AppStorage("keyboardSetupExpanded") private var keyboardSetupExpanded = true
     @State private var isNavScrolled = false
     @State private var scrollTarget: String?
+    @State private var keyboardIsReady = KeyboardStatusStore.isReady
+    @State private var keyboardLastActive = KeyboardStatusStore.lastActiveAt
 
     var body: some View {
         ZStack {
@@ -26,6 +28,20 @@ struct ContentView: View {
                             .id("result")
                         if !viewModel.isLoading {
                             examplesSection
+                        }
+                        if !viewModel.recentHistory.isEmpty {
+                            RecentTranslationsSection(
+                                entries: viewModel.recentHistory,
+                                onSelect: { entry in
+                                    inputFocused = false
+                                    viewModel.useHistoryEntry(entry)
+                                    Task { await viewModel.translate() }
+                                },
+                                onClear: viewModel.clearHistory
+                            )
+                        }
+                        if viewModel.cachedPhraseCount > 0 {
+                            cachedPhrasesSection
                         }
                         keyboardSetupSection
                             .id("keyboard")
@@ -76,6 +92,15 @@ struct ContentView: View {
         }
         .preferredColorScheme(.light)
         .animation(.spring(response: 0.35, dampingFraction: 0.86), value: viewModel.phase)
+        .onAppear(perform: refreshKeyboardStatus)
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            refreshKeyboardStatus()
+        }
+    }
+
+    private func refreshKeyboardStatus() {
+        keyboardIsReady = KeyboardStatusStore.isReady
+        keyboardLastActive = KeyboardStatusStore.lastActiveAt
     }
 
     private var heroSection: some View {
@@ -307,63 +332,34 @@ struct ContentView: View {
         .padding(.top, 4)
     }
 
-    private var keyboardSetupSection: some View {
-        DisclosureGroup(isExpanded: $keyboardSetupExpanded) {
-            VStack(alignment: .leading, spacing: 12) {
-                VStack(alignment: .leading, spacing: 8) {
-                    setupStep(number: 1, text: "Open Settings → General → Keyboard → Keyboards")
-                    setupStep(number: 2, text: "Tap Add New Keyboard… → SayWell")
-                    setupStep(number: 3, text: "Tap SayWell → turn on Allow Full Access")
-                    setupStep(number: 4, text: "In any app, tap 🌐 to switch to SayWell")
-                }
-
-                Text("Full Access lets the keyboard reach the translation API. iOS will show Apple’s network prompt — that’s expected.")
-                    .font(.system(.caption, design: .rounded))
+    private var cachedPhrasesSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Cached phrases")
+                    .font(.system(.caption2, design: .rounded).weight(.semibold))
+                    .foregroundStyle(SayWellTheme.lagoon.opacity(0.65))
+                Spacer()
+                Text("\(viewModel.cachedPhraseCount)")
+                    .font(.system(.caption2, design: .rounded).weight(.medium))
+                    .foregroundStyle(SayWellTheme.lagoon.opacity(0.55))
+                Button("Clear", action: viewModel.clearLocalPhraseCache)
+                    .font(.system(.caption2, design: .rounded).weight(.semibold))
                     .foregroundStyle(SayWellTheme.lagoon.opacity(0.7))
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Button {
-                    openSettings()
-                } label: {
-                    Text("Open Settings")
-                        .font(.system(.body, design: .rounded).weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .foregroundStyle(.white)
-                        .background(SayWellTheme.brand, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                }
-            }
-            .padding(.top, 8)
-        } label: {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Keyboard")
-                    .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                    .foregroundStyle(SayWellTheme.lagoon.opacity(0.75))
-                Text("Enable SayWell in Settings")
-                    .font(.system(.footnote, design: .rounded))
-                    .foregroundStyle(SayWellTheme.ink.opacity(0.55))
             }
         }
-        .padding(16)
-        .background(SayWellTheme.foam.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(SayWellTheme.lagoon.opacity(0.12), lineWidth: 1)
-        }
-        .tint(SayWellTheme.brand)
+        .padding(.top, -20)
     }
 
-    private func setupStep(number: Int, text: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Text("\(number)")
-                .font(.system(.caption, design: .rounded).weight(.bold))
-                .foregroundStyle(.white)
-                .frame(width: 22, height: 22)
-                .background(SayWellTheme.brand, in: Circle())
-            Text(text)
-                .font(.system(.subheadline, design: .rounded))
-                .foregroundStyle(SayWellTheme.ink)
-                .fixedSize(horizontal: false, vertical: true)
+    private var keyboardSetupSection: some View {
+        Group {
+            if keyboardIsReady {
+                KeyboardReadyCard(lastActive: keyboardLastActive)
+            } else {
+                KeyboardSetupCard(
+                    isExpanded: $keyboardSetupExpanded,
+                    onOpenSettings: openSettings
+                )
+            }
         }
     }
 }

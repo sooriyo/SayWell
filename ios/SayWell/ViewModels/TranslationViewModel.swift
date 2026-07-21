@@ -17,6 +17,7 @@ final class TranslationViewModel {
     var errorMessage: String?
     var isLoading = false
     var didCopy = false
+    private(set) var recentHistory: [TranslationHistoryEntry] = []
 
     private let api: SayWellAPI
     private var translateTask: Task<Void, Never>?
@@ -24,6 +25,7 @@ final class TranslationViewModel {
 
     init(api: SayWellAPI = .shared) {
         self.api = api
+        reloadHistory()
     }
 
     var trimmedInput: String {
@@ -74,6 +76,16 @@ final class TranslationViewModel {
             return
         }
 
+        // Check the persisted cache first — if we have it, skip the network entirely.
+        if let cached = LocalPhraseCache.lookup(phrase: text) {
+            translation = cached
+            LocalPhraseCache.record(phrase: text, response: cached)
+            TranslationHistoryStore.record(singlish: text, response: cached)
+            reloadHistory()
+            Haptics.notify(.success)
+            return
+        }
+
         isLoading = true
         errorMessage = nil
         translation = nil
@@ -84,6 +96,9 @@ final class TranslationViewModel {
                 let result = try await api.translate(text: text)
                 guard !Task.isCancelled else { return }
                 translation = result
+                LocalPhraseCache.record(phrase: text, response: result)
+                TranslationHistoryStore.record(singlish: text, response: result)
+                reloadHistory()
                 Haptics.notify(.success)
             } catch is CancellationError {
                 return
@@ -134,6 +149,27 @@ final class TranslationViewModel {
         translation = nil
         didCopy = false
         Haptics.impact(.soft)
+    }
+
+    func useHistoryEntry(_ entry: TranslationHistoryEntry) {
+        useExample(entry.singlish)
+    }
+
+    func clearHistory() {
+        TranslationHistoryStore.clear()
+        reloadHistory()
+    }
+
+    func clearLocalPhraseCache() {
+        LocalPhraseCache.clear()
+    }
+
+    var cachedPhraseCount: Int {
+        LocalPhraseCache.count
+    }
+
+    func reloadHistory() {
+        recentHistory = TranslationHistoryStore.load()
     }
 
     func clear() {

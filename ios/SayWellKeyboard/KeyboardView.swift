@@ -59,6 +59,10 @@ final class SayWellKeyboardView: UIView {
         isOpaque = false
         buildChrome()
         rebuildKeys()
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: SayWellKeyboardView, _) in
+            self.rebuildKeys()
+            self.suggestionBar.refreshColors()
+        }
     }
 
     @available(*, unavailable)
@@ -68,12 +72,6 @@ final class SayWellKeyboardView: UIView {
 
     override var intrinsicContentSize: CGSize {
         CGSize(width: UIView.noIntrinsicMetric, height: Self.preferredHeight)
-    }
-
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        rebuildKeys()
-        suggestionBar.refreshColors()
     }
 
     func apply(suggestion: TranslationSuggester.SuggestionState) {

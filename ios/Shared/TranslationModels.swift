@@ -4,13 +4,14 @@ struct TranslationRequest: Encodable {
     let text: String
 }
 
-struct TranslationResponse: Decodable, Equatable {
+struct TranslationResponse: Codable, Equatable {
     let translation: String
     let source: TranslationSource
     let normalized: String
 }
 
-enum TranslationSource: String, Decodable, Equatable {
+enum TranslationSource: String, Codable, Equatable {
+    case builtin
     case cache
     case model
 }

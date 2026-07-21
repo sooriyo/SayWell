@@ -14,16 +14,23 @@
 		1AD1A2880C32CC551385F6A8 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
 		3BD1A2F765BF0D34C39F6612 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
 		474E93F9F1F0546C283A01B5 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
+		4AE8FD04DCFD7BA1984FB696 /* TranslationHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */; };
 		4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
 		509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E61B148C08C617CA67F25744 /* KeyboardView.swift */; };
 		52DCC0187917352FBBB4E690 /* SayWellApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E475D773A141A4599D2F48D5 /* SayWellApp.swift */; };
+		566723FDD40283BCFFDA58A4 /* LocalPhraseCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */; };
+		70759A9E1FAB3EC100B98B51 /* KeyboardStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */; };
+		79F8394F5C9913E21ED63525 /* RecentTranslationsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBCE2B830AA4BCCEAD89FFE /* RecentTranslationsSection.swift */; };
+		9F5B9891A5829C55BDBB20DA /* KeyboardStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */; };
 		A57727E7C3891B132A1FDD9F /* DeviceIDStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */; };
 		B0E949716D22C0F859916A2A /* TranslationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */; };
 		BECF1F022A368B77C272F376 /* TranslationComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A162156330BB6482195590D /* TranslationComponents.swift */; };
+		C2E28C18C9CD8CA65150EFB8 /* LocalPhraseCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */; };
 		C831D996570E4C0CF9CE6BC0 /* SayWellTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B698604D92F098295E3D8 /* SayWellTheme.swift */; };
 		CDBA4FCAF7F495A1FBAC1E18 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79D8AD5124A7F60AA47909E6 /* Assets.xcassets */; };
 		E4AF45D44FC15C5452DA2E9A /* TranslationSuggester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F8D401C09948DC945AE574 /* TranslationSuggester.swift */; };
 		EEFCE895C48909945C474993 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */; };
+		F4FF2869F93C9D1B67B54120 /* KeyboardSetupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44E749D94B109273CB2F7A1 /* KeyboardSetupViews.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,12 +67,17 @@
 		77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationModels.swift; sourceTree = "<group>"; };
 		79D8AD5124A7F60AA47909E6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7FBC1841814C133F9DF5F101 /* SayWell.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SayWell.entitlements; sourceTree = "<group>"; };
+		8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryStore.swift; sourceTree = "<group>"; };
 		9F9F1C1F35006D2F501CB4BC /* FloatingNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingNavBar.swift; sourceTree = "<group>"; };
 		AA1B698604D92F098295E3D8 /* SayWellTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellTheme.swift; sourceTree = "<group>"; };
+		B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardStatusStore.swift; sourceTree = "<group>"; };
 		C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPhraseCache.swift; sourceTree = "<group>"; };
+		D44E749D94B109273CB2F7A1 /* KeyboardSetupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupViews.swift; sourceTree = "<group>"; };
 		D5B62247EE53059B7815FDC9 /* SayWell.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SayWell.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E475D773A141A4599D2F48D5 /* SayWellApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellApp.swift; sourceTree = "<group>"; };
 		E61B148C08C617CA67F25744 /* KeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardView.swift; sourceTree = "<group>"; };
+		EFBCE2B830AA4BCCEAD89FFE /* RecentTranslationsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentTranslationsSection.swift; sourceTree = "<group>"; };
 		F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellAPI.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -75,6 +87,8 @@
 			children = (
 				C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */,
 				9F9F1C1F35006D2F501CB4BC /* FloatingNavBar.swift */,
+				D44E749D94B109273CB2F7A1 /* KeyboardSetupViews.swift */,
+				EFBCE2B830AA4BCCEAD89FFE /* RecentTranslationsSection.swift */,
 				2A162156330BB6482195590D /* TranslationComponents.swift */,
 			);
 			path = Views;
@@ -111,6 +125,8 @@
 			isa = PBXGroup;
 			children = (
 				2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */,
+				B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */,
+				D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */,
 				F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */,
 				77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */,
 			);
@@ -130,6 +146,7 @@
 		DE34FE7E5C37BA123DE82E9A /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */,
 				1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */,
 			);
 			path = ViewModels;
@@ -246,10 +263,15 @@
 				EEFCE895C48909945C474993 /* ContentView.swift in Sources */,
 				0E08EF70668644FAE020260D /* DeviceIDStore.swift in Sources */,
 				1952CFF101FF8DB150F81E7E /* FloatingNavBar.swift in Sources */,
+				F4FF2869F93C9D1B67B54120 /* KeyboardSetupViews.swift in Sources */,
+				70759A9E1FAB3EC100B98B51 /* KeyboardStatusStore.swift in Sources */,
+				C2E28C18C9CD8CA65150EFB8 /* LocalPhraseCache.swift in Sources */,
+				79F8394F5C9913E21ED63525 /* RecentTranslationsSection.swift in Sources */,
 				4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */,
 				52DCC0187917352FBBB4E690 /* SayWellApp.swift in Sources */,
 				C831D996570E4C0CF9CE6BC0 /* SayWellTheme.swift in Sources */,
 				BECF1F022A368B77C272F376 /* TranslationComponents.swift in Sources */,
+				4AE8FD04DCFD7BA1984FB696 /* TranslationHistoryStore.swift in Sources */,
 				3BD1A2F765BF0D34C39F6612 /* TranslationModels.swift in Sources */,
 				B0E949716D22C0F859916A2A /* TranslationViewModel.swift in Sources */,
 			);
@@ -260,8 +282,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				A57727E7C3891B132A1FDD9F /* DeviceIDStore.swift in Sources */,
+				9F5B9891A5829C55BDBB20DA /* KeyboardStatusStore.swift in Sources */,
 				509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */,
 				153D9836CAC98CC0F8311E3C /* KeyboardViewController.swift in Sources */,
+				566723FDD40283BCFFDA58A4 /* LocalPhraseCache.swift in Sources */,
 				474E93F9F1F0546C283A01B5 /* SayWellAPI.swift in Sources */,
 				1AD1A2880C32CC551385F6A8 /* TranslationModels.swift in Sources */,
 				E4AF45D44FC15C5452DA2E9A /* TranslationSuggester.swift in Sources */,
@@ -318,6 +342,7 @@
 				DEVELOPMENT_TEAM = B2FR24RN8D;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -338,6 +363,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -458,6 +484,7 @@
 				DEVELOPMENT_TEAM = B2FR24RN8D;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -471,6 +498,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
