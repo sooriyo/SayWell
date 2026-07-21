@@ -187,4 +187,21 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Refocused [FUTURE_PLANS.md](FUTURE_PLANS.md): **Tier 0** = privacy policy, terms, in-app disclosure, privacy manifest, App Store labels, backend log/CORS hardening, sensitive-field guardrails
 - Tier 1 feature work (tone, alternatives) deferred until after v1.0 submit
 - Marked recent history + local phrase cache as shipped in baseline; v1.1 bundle updated accordingly
+
+### 2026-07-21 — Smart syncing: downloaded common phrases with version control
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 12:03PM
+- **CommonPhrasesStore.swift** (`ios/Shared/`) — smart versioning with 24-hour throttle; downloads from backend on app startup
+- **Backend endpoints:** `GET /api/common-phrases/meta` (lightweight version check, ~100 bytes) + `GET /api/common-phrases/full` (full bundle, ~10KB)
+- **Sync strategy:** iOS queries `/meta` on launch (24h throttle), only downloads `/full` if newer version available
+- **Three-tier lookup:** LocalPhraseCache (personal) → CommonPhrasesStore (global, offline) → Backend API (fallback)
+- **iOS integration:** TranslationSuggester + TranslationViewModel check downloaded phrases before network; ContentView shows count + Refresh + Clear UI
+- **Offline support:** device works for common phrases even without internet ✓
+- Committed as `5d42053` (iOS) + `a92c755` (backend).
+
+### 2026-07-21 — Keyboard suggestions fix + debounce tuning
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 12:12PM
+- **Fixed punctuation bug:** phrases ending with `?` `.` `!` now show suggestions. KeyboardPhraseExtractor now extracts second-to-last segment when last is empty (e.g. "oyata kohomada?" → "oyata kohomada")
+- **Increased debounce:** 700ms → 1 second. Keyboard waits until user pauses typing before sending requests (reduces API calls + backend load)
+- **Result:** fewer requests while typing, better UX, lower mobile data usage
+- Committed as `64e67fd` (fix) + `c2c944d` (debounce).
 - Added **Current focus** section here for agent handoff
