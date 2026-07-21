@@ -1,0 +1,516 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0E08EF70668644FAE020260D /* DeviceIDStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */; };
+		153D9836CAC98CC0F8311E3C /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66042E156175D4B72AB125DD /* KeyboardViewController.swift */; };
+		16C14084C6118E3E41189DD5 /* SayWellKeyboard.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 13384F357F07A00CBA941FBB /* SayWellKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1AD1A2880C32CC551385F6A8 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
+		3BD1A2F765BF0D34C39F6612 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
+		474E93F9F1F0546C283A01B5 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
+		4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
+		509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E61B148C08C617CA67F25744 /* KeyboardView.swift */; };
+		52DCC0187917352FBBB4E690 /* SayWellApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E475D773A141A4599D2F48D5 /* SayWellApp.swift */; };
+		A57727E7C3891B132A1FDD9F /* DeviceIDStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */; };
+		B0E949716D22C0F859916A2A /* TranslationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */; };
+		C831D996570E4C0CF9CE6BC0 /* SayWellTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B698604D92F098295E3D8 /* SayWellTheme.swift */; };
+		CDBA4FCAF7F495A1FBAC1E18 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79D8AD5124A7F60AA47909E6 /* Assets.xcassets */; };
+		E4AF45D44FC15C5452DA2E9A /* TranslationSuggester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F8D401C09948DC945AE574 /* TranslationSuggester.swift */; };
+		EEFCE895C48909945C474993 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AE658CF009E09B794A45E9AA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A053A6CA69C5550F5B9C33C6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA6FFB8B77686AAF6E18AB6F;
+			remoteInfo = SayWellKeyboard;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1F136D3D42E9649C034850CD /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				16C14084C6118E3E41189DD5 /* SayWellKeyboard.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		07F8D401C09948DC945AE574 /* TranslationSuggester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationSuggester.swift; sourceTree = "<group>"; };
+		13384F357F07A00CBA941FBB /* SayWellKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SayWellKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationViewModel.swift; sourceTree = "<group>"; };
+		2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIDStore.swift; sourceTree = "<group>"; };
+		66042E156175D4B72AB125DD /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
+		77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationModels.swift; sourceTree = "<group>"; };
+		79D8AD5124A7F60AA47909E6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7FBC1841814C133F9DF5F101 /* SayWell.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SayWell.entitlements; sourceTree = "<group>"; };
+		AA1B698604D92F098295E3D8 /* SayWellTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellTheme.swift; sourceTree = "<group>"; };
+		C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D5B62247EE53059B7815FDC9 /* SayWell.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SayWell.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E475D773A141A4599D2F48D5 /* SayWellApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellApp.swift; sourceTree = "<group>"; };
+		E61B148C08C617CA67F25744 /* KeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardView.swift; sourceTree = "<group>"; };
+		F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellAPI.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		214DF92CF189275F95522245 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		262AD435CA5820754A33FA8D /* SayWellKeyboard */ = {
+			isa = PBXGroup;
+			children = (
+				E61B148C08C617CA67F25744 /* KeyboardView.swift */,
+				66042E156175D4B72AB125DD /* KeyboardViewController.swift */,
+				07F8D401C09948DC945AE574 /* TranslationSuggester.swift */,
+			);
+			path = SayWellKeyboard;
+			sourceTree = "<group>";
+		};
+		36172409B6647FA1E83C6726 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				AA1B698604D92F098295E3D8 /* SayWellTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		4DE9BD1D661B6DEF50DFCE15 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D5B62247EE53059B7815FDC9 /* SayWell.app */,
+				13384F357F07A00CBA941FBB /* SayWellKeyboard.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8030A70D350469CB53AB0CFA /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */,
+				F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */,
+				77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		C55171E1F1A84CA5FEF7250F = {
+			isa = PBXGroup;
+			children = (
+				FB158F8C8FEA2163C16F5EBA /* SayWell */,
+				262AD435CA5820754A33FA8D /* SayWellKeyboard */,
+				8030A70D350469CB53AB0CFA /* Shared */,
+				4DE9BD1D661B6DEF50DFCE15 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DE34FE7E5C37BA123DE82E9A /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		FB158F8C8FEA2163C16F5EBA /* SayWell */ = {
+			isa = PBXGroup;
+			children = (
+				79D8AD5124A7F60AA47909E6 /* Assets.xcassets */,
+				7FBC1841814C133F9DF5F101 /* SayWell.entitlements */,
+				E475D773A141A4599D2F48D5 /* SayWellApp.swift */,
+				36172409B6647FA1E83C6726 /* Theme */,
+				DE34FE7E5C37BA123DE82E9A /* ViewModels */,
+				214DF92CF189275F95522245 /* Views */,
+			);
+			path = SayWell;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6EBC1C90E1C66AC715EF8DE6 /* SayWell */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CBC9C9EA5FD3E5FC28D89545 /* Build configuration list for PBXNativeTarget "SayWell" */;
+			buildPhases = (
+				9A78532DEE34CE46BF3719DD /* Sources */,
+				32E534C3AECF40994184D692 /* Resources */,
+				1F136D3D42E9649C034850CD /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				34C1408C29ED17524DADCC26 /* PBXTargetDependency */,
+			);
+			name = SayWell;
+			packageProductDependencies = (
+			);
+			productName = SayWell;
+			productReference = D5B62247EE53059B7815FDC9 /* SayWell.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AA6FFB8B77686AAF6E18AB6F /* SayWellKeyboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C22035DC0B805CEE0D39E735 /* Build configuration list for PBXNativeTarget "SayWellKeyboard" */;
+			buildPhases = (
+				F9A4D1D58D0774C785AD1837 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SayWellKeyboard;
+			packageProductDependencies = (
+			);
+			productName = SayWellKeyboard;
+			productReference = 13384F357F07A00CBA941FBB /* SayWellKeyboard.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A053A6CA69C5550F5B9C33C6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 579E54D5AEC784AFB75445D1 /* Build configuration list for PBXProject "SayWell" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = C55171E1F1A84CA5FEF7250F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4DE9BD1D661B6DEF50DFCE15 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6EBC1C90E1C66AC715EF8DE6 /* SayWell */,
+				AA6FFB8B77686AAF6E18AB6F /* SayWellKeyboard */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		32E534C3AECF40994184D692 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CDBA4FCAF7F495A1FBAC1E18 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9A78532DEE34CE46BF3719DD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EEFCE895C48909945C474993 /* ContentView.swift in Sources */,
+				0E08EF70668644FAE020260D /* DeviceIDStore.swift in Sources */,
+				4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */,
+				52DCC0187917352FBBB4E690 /* SayWellApp.swift in Sources */,
+				C831D996570E4C0CF9CE6BC0 /* SayWellTheme.swift in Sources */,
+				3BD1A2F765BF0D34C39F6612 /* TranslationModels.swift in Sources */,
+				B0E949716D22C0F859916A2A /* TranslationViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9A4D1D58D0774C785AD1837 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A57727E7C3891B132A1FDD9F /* DeviceIDStore.swift in Sources */,
+				509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */,
+				153D9836CAC98CC0F8311E3C /* KeyboardViewController.swift in Sources */,
+				474E93F9F1F0546C283A01B5 /* SayWellAPI.swift in Sources */,
+				1AD1A2880C32CC551385F6A8 /* TranslationModels.swift in Sources */,
+				E4AF45D44FC15C5452DA2E9A /* TranslationSuggester.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		34C1408C29ED17524DADCC26 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA6FFB8B77686AAF6E18AB6F /* SayWellKeyboard */;
+			targetProxy = AE658CF009E09B794A45E9AA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0930A509CF7E9AA567013BEC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4319FC8879F8ED4FCF86AD58 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SayWellKeyboard/SayWellKeyboard.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B2FR24RN8D;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SayWellKeyboard/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.saywell.app.keyboard;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4CDBE6469D4A7E649698AF3F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentTeal;
+				CODE_SIGN_ENTITLEMENTS = SayWell/SayWell.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B2FR24RN8D;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SayWell;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.saywell.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		70F54BCC841C18D0087B2AAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentTeal;
+				CODE_SIGN_ENTITLEMENTS = SayWell/SayWell.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B2FR24RN8D;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = SayWell;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.saywell.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C74BAB389FFC92DDC78CA2CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D1851A56D909D3D6C0F2D7CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SayWellKeyboard/SayWellKeyboard.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B2FR24RN8D;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SayWellKeyboard/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.saywell.app.keyboard;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		579E54D5AEC784AFB75445D1 /* Build configuration list for PBXProject "SayWell" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0930A509CF7E9AA567013BEC /* Debug */,
+				C74BAB389FFC92DDC78CA2CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C22035DC0B805CEE0D39E735 /* Build configuration list for PBXNativeTarget "SayWellKeyboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1851A56D909D3D6C0F2D7CE /* Debug */,
+				4319FC8879F8ED4FCF86AD58 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CBC9C9EA5FD3E5FC28D89545 /* Build configuration list for PBXNativeTarget "SayWell" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4CDBE6469D4A7E649698AF3F /* Debug */,
+				70F54BCC841C18D0087B2AAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A053A6CA69C5550F5B9C33C6 /* Project object */;
+}
