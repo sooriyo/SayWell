@@ -60,17 +60,22 @@ final class TranslationSuggester {
         }
 
         if let persisted = LocalPhraseCache.lookup(phrase: trimmed) {
-            memoryCache[trimmed.lowercased()] = persisted
-            LocalPhraseCache.record(phrase: trimmed, response: persisted)
+            let withSource = TranslationResponse(
+                translation: persisted.translation,
+                source: .persistedCache,
+                normalized: persisted.normalized
+            )
+            memoryCache[trimmed.lowercased()] = withSource
+            LocalPhraseCache.record(phrase: trimmed, response: withSource)
             lastRequested = trimmed
-            onUpdate?(.ready(phrase: trimmed, charCount: charCount, translation: persisted))
+            onUpdate?(.ready(phrase: trimmed, charCount: charCount, translation: withSource))
             return
         }
 
         if let downloaded = CommonPhrasesStore.lookup(phrase: trimmed) {
             let response = TranslationResponse(
                 translation: downloaded,
-                source: .builtin,
+                source: .commonPhrases,
                 normalized: trimmed
             )
             memoryCache[trimmed.lowercased()] = response

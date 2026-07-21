@@ -78,9 +78,14 @@ final class TranslationViewModel {
 
         // Check the personal phrase cache first — if we have it, skip the network entirely.
         if let cached = LocalPhraseCache.lookup(phrase: text) {
-            translation = cached
-            LocalPhraseCache.record(phrase: text, response: cached)
-            TranslationHistoryStore.record(singlish: text, response: cached)
+            let withSource = TranslationResponse(
+                translation: cached.translation,
+                source: .persistedCache,
+                normalized: cached.normalized
+            )
+            translation = withSource
+            LocalPhraseCache.record(phrase: text, response: withSource)
+            TranslationHistoryStore.record(singlish: text, response: withSource)
             reloadHistory()
             Haptics.notify(.success)
             return
@@ -90,7 +95,7 @@ final class TranslationViewModel {
         if let downloaded = CommonPhrasesStore.lookup(phrase: text) {
             translation = TranslationResponse(
                 translation: downloaded,
-                source: .builtin,
+                source: .commonPhrases,
                 normalized: text
             )
             LocalPhraseCache.record(phrase: text, response: translation!)

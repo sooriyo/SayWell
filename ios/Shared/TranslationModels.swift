@@ -11,9 +11,19 @@ struct TranslationResponse: Codable, Equatable {
 }
 
 enum TranslationSource: String, Codable, Equatable {
-    case builtin
-    case cache
-    case model
+    case inMemoryCache = "in-memory"
+    case persistedCache = "disk"
+    case commonPhrases = "builtin"
+    case geminiAPI = "api"
+
+    var label: String {
+        switch self {
+        case .inMemoryCache: return "Cached"
+        case .persistedCache: return "Saved"
+        case .commonPhrases: return "Common"
+        case .geminiAPI: return "AI"
+        }
+    }
 }
 
 struct APIErrorResponse: Decodable {
