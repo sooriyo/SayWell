@@ -11,6 +11,9 @@ settings:
     SWIFT_VERSION: "5.0"
     TARGETED_DEVICE_FAMILY: "1,2"
     DEVELOPMENT_TEAM: ""
+    # Avoid intermittent "entitlements file was modified during the build" failures
+    # when Xcode touches the entitlements plist while signing.
+    CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION: YES
 
 targets:
   SayWell:
@@ -36,6 +39,9 @@ targets:
         CODE_SIGN_ENTITLEMENTS: SayWell/SayWell.entitlements
     entitlements:
       path: SayWell/SayWell.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.dev.saywell.app
     dependencies:
       - target: SayWellKeyboard
 
@@ -60,3 +66,6 @@ targets:
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
     entitlements:
       path: SayWellKeyboard/SayWellKeyboard.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.dev.saywell.app
