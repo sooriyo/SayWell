@@ -91,6 +91,39 @@ final class SayWellKeyboardView: UIView {
         CGSize(width: UIView.noIntrinsicMetric, height: Self.preferredHeight)
     }
 
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        // First, try the normal hit-test (suggestion bar, previews, etc.)
+        if let view = super.hitTest(point, with: event), view !== self {
+            return view
+        }
+
+        // If no view hit, find the closest key button (native keyboard behavior)
+        var closestButton: KeyButton?
+        var closestDistance = CGFloat.infinity
+
+        func findClosestButton(in view: UIView) {
+            for subview in view.subviews {
+                if let button = subview as? KeyButton {
+                    let distance = distanceFromPointToRect(point, button.frame)
+                    if distance < closestDistance {
+                        closestDistance = distance
+                        closestButton = button
+                    }
+                } else {
+                    findClosestButton(in: subview)
+                }
+            }
+        }
+
+        findClosestButton(in: self)
+        return closestButton
+    }
+
+    private func distanceFromPointToRect(_ point: CGPoint, _ rect: CGRect) -> CGFloat {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        return hypot(point.x - center.x, point.y - center.y)
+    }
+
     func apply(suggestion: TranslationSuggester.SuggestionState) {
         currentSuggestion = suggestion
         suggestionBar.apply(suggestion)
@@ -768,13 +801,6 @@ final class KeyButton: UIButton {
         if style == .letter {
             onEndPreview?()
         }
-    }
-
-    // Expand touch area to catch touches in gaps between keys (like native keyboard)
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        let inset: CGFloat = -4 // Expand hit area by 4pt on all sides
-        let expandedBounds = bounds.insetBy(dx: inset, dy: inset)
-        return expandedBounds.contains(point)
     }
 }
 
