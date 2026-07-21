@@ -128,12 +128,26 @@ final class TranslationSuggester {
 
 enum KeyboardPhraseExtractor {
     /// Current Singlish phrase before the cursor — last sentence-ish segment.
+    /// Extracts text from the last sentence boundary to the cursor, stripping trailing punctuation.
     static func currentPhrase(beforeCursor context: String?) -> String {
         guard let context, !context.isEmpty else { return "" }
 
+        // Find the last sentence-ending character (., !, ?, newline)
         let separators = CharacterSet(charactersIn: "\n.!?")
         let parts = context.components(separatedBy: separators)
-        let last = parts.last ?? context
-        return last.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // If split produced multiple parts, the last may be empty (if context ends with punctuation).
+        // Use the last non-empty part, or fall back to last part.
+        let candidate = parts.last ?? context
+        let trimmed = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // If we got empty string and there are multiple parts, try the second-to-last
+        // (handles case where sentence ends with punctuation: "oyata kohomada?" → "oyata kohomada")
+        if trimmed.isEmpty, parts.count > 1 {
+            let secondLast = parts[parts.count - 2].trimmingCharacters(in: .whitespacesAndNewlines)
+            return secondLast
+        }
+
+        return trimmed
     }
 }
