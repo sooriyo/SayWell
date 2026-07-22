@@ -25,3 +25,17 @@ Older entries (before 2026-07-21) — kept for reference, not needed for active 
 - Tried glass effect / material blur — user rejected visible plate/border
 - **Final:** transparent view, keys + suggestion text only, pinned to bottom
 - Committed & pushed as `842f578`
+
+### 2026-07-21 — Workspace + early UX polish (archived from active log)
+- Workspace reorganized to `ios/` + `backend/` layout; backend gitignored in iOS repo
+- Suggestion bar loading UX (pulsing dots, friendly copy)
+- Host app UX polish (welcome card, share/copy, haptics, TranslationComponents.swift)
+- Floating navigation bar (FloatingNavBar.swift)
+- `FUTURE_PLANS.md` roadmap doc added
+- iOS build fix: KeyboardStatusStore + RecentTranslationsSection on disk
+- Roadmap refocus: Tier 0 privacy before App Store; Tier 1 deferred
+
+### 2026-07-21 — Backend cost + launch checkpoints (archived)
+- Backend improvements: builtin phrases, fuzzy match, prompt trim, CACHE_VERSION v2 (`b94063d`)
+- Expand commonPhrases 11→52 (63% token savings, `e56d4fa`)
+- v1.0 launch readiness checkpoint + v2.0 dictionary deploy to production

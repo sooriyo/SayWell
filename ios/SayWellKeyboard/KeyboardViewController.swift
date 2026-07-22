@@ -2,7 +2,7 @@ import UIKit
 
 final class KeyboardViewController: UIInputViewController {
     private let suggester = TranslationSuggester()
-    private var keyboardView: SayWellKeyboardView!
+    private var keyboardView: SayWellKeyboardView?
     private var heightConstraint: NSLayoutConstraint?
 
     override func viewDidLoad() {
@@ -11,8 +11,8 @@ final class KeyboardViewController: UIInputViewController {
         // Let Auto Layout own the keyboard height so we don't leave a tall empty
         // gray band covering the host app (the circled overlay).
         inputView?.allowsSelfSizing = true
-        let touchTrap = UIColor.white.withAlphaComponent(0.01)
-        inputView?.backgroundColor = touchTrap
+        // Let the system keyboard tray show through — matches globe/mic bar seamlessly.
+        inputView?.backgroundColor = .clear
         inputView?.isOpaque = false
         inputView?.clipsToBounds = false
 
@@ -21,10 +21,16 @@ final class KeyboardViewController: UIInputViewController {
         refreshSuggestion()
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        suggester.cancel()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         KeyboardStatusStore.recordKeyboardActive(hasFullAccess: hasFullAccess)
-        keyboardView.setNeedsInputModeSwitchKey(needsInputModeSwitchKey)
+        keyboardView?.setNeedsInputModeSwitchKey(needsInputModeSwitchKey)
+        keyboardView?.syncSuggestionBarToggle()
         updateHeight()
         refreshSuggestion()
     }
@@ -42,14 +48,16 @@ final class KeyboardViewController: UIInputViewController {
 
     private func setupKeyboard() {
         print("🎹 [SETUP] Setting up keyboard")
-        let touchTrap = UIColor.white.withAlphaComponent(0.01)
-        view.backgroundColor = touchTrap
+        view.backgroundColor = .clear
         view.isOpaque = false
         view.clipsToBounds = false
 
         let keyboard = SayWellKeyboardView(frame: .zero)
         keyboard.translatesAutoresizingMaskIntoConstraints = false
         keyboard.delegate = self
+        keyboard.onPreferredHeightChange = { [weak self] in
+            self?.updateHeight()
+        }
         view.addSubview(keyboard)
         keyboardView = keyboard
         print("🎹 [SETUP] Keyboard view added: \(type(of: keyboard))")
@@ -62,17 +70,18 @@ final class KeyboardViewController: UIInputViewController {
         NSLayoutConstraint.activate([
             keyboard.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             keyboard.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            keyboard.topAnchor.constraint(equalTo: view.topAnchor),
             keyboard.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             height,
         ])
 
-        keyboardView.setNeedsInputModeSwitchKey(needsInputModeSwitchKey)
+        keyboardView?.setNeedsInputModeSwitchKey(needsInputModeSwitchKey)
         updateReturnKey()
         updateHeight()
     }
 
     private func updateHeight() {
-        let next = SayWellKeyboardView.preferredHeight
+        let next = keyboardView?.preferredContentHeight ?? SayWellKeyboardView.preferredHeight
         guard heightConstraint?.constant != next else { return }
         heightConstraint?.constant = next
         view.setNeedsLayout()
@@ -80,7 +89,7 @@ final class KeyboardViewController: UIInputViewController {
 
     private func bindSuggester() {
         suggester.onUpdate = { [weak self] state in
-            self?.keyboardView.apply(suggestion: state)
+            self?.keyboardView?.apply(suggestion: state)
         }
     }
 
@@ -93,7 +102,7 @@ final class KeyboardViewController: UIInputViewController {
 
     private func updateReturnKey() {
         let returnKeyType = textDocumentProxy.returnKeyType ?? .default
-        keyboardView.setReturnKeyTitle(Self.title(for: returnKeyType))
+        keyboardView?.setReturnKeyTitle(Self.title(for: returnKeyType))
     }
 
     private static func title(for type: UIReturnKeyType) -> String {
@@ -137,12 +146,30 @@ final class KeyboardViewController: UIInputViewController {
 }
 
 extension KeyboardViewController: SayWellKeyboardViewDelegate {
+    func keyboardViewDidToggleTranslations(_ view: SayWellKeyboardView) {
+        suggester.reset()
+        view.syncSuggestionBarToggle()
+        refreshSuggestion()
+    }
+
+    func keyboardViewDidChangeTone(_ view: SayWellKeyboardView) {
+        view.syncSuggestionBarTone()
+        suggester.prepareForToneChange()
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(1200))
+            view.endToneModeHint()
+            self.refreshSuggestion()
+        }
+    }
+
     func keyboardView(_ view: SayWellKeyboardView, didTapKey key: KeyboardKey) {
         switch key {
         case .character(let value):
+            if view.consumeCharacterForEmojiSearch(value) { break }
             textDocumentProxy.insertText(value)
             refreshSuggestion()
         case .space:
+            if view.consumeSpaceForEmojiSearch() { break }
             textDocumentProxy.insertText(" ")
             refreshSuggestion()
         case .returnKey:
@@ -150,6 +177,7 @@ extension KeyboardViewController: SayWellKeyboardViewDelegate {
             suggester.reset()
             refreshSuggestion()
         case .backspace:
+            if view.consumeBackspaceForEmojiSearch() { break }
             textDocumentProxy.deleteBackward()
             refreshSuggestion()
         case .shift:
@@ -161,7 +189,7 @@ extension KeyboardViewController: SayWellKeyboardViewDelegate {
         case .globe:
             advanceToNextInputMode()
         case .emoji:
-            advanceToNextInputMode()
+            view.toggleEmoji()
         case .acceptSuggestion:
             if case let .ready(phrase, charCount, translation) = view.currentSuggestion {
                 insertTranslation(translation.translation, replacingPhrase: phrase, charCount: charCount)

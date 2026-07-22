@@ -29,7 +29,7 @@ actor SayWellAPI {
         }
     }
 
-    func translate(text: String) async throws -> TranslationResponse {
+    func translate(text: String, tone: TranslationTone = KeyboardStatusStore.translationTone) async throws -> TranslationResponse {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { throw SayWellError.emptyInput }
         guard trimmed.count <= Self.maxInputChars else { throw SayWellError.inputTooLong }
@@ -40,7 +40,9 @@ actor SayWellAPI {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue(DeviceIDStore.deviceID, forHTTPHeaderField: "X-Device-Id")
-        request.httpBody = try JSONEncoder().encode(TranslationRequest(text: trimmed))
+        request.httpBody = try JSONEncoder().encode(
+            TranslationRequest(text: trimmed, tone: tone.rawValue)
+        )
 
         let data: Data
         let response: URLResponse

@@ -64,22 +64,28 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - App Group: `group.dev.saywell.app` (shared device ID between app + keyboard)
 - Dev team: `B2FR24RN8D` (tharukaravisara@gmail.com)
 - Keyboard needs **Allow Full Access** for network calls to `/translate`
-- Suggestion bar: 700ms debounce, in-memory cache, phrase = text since last `.` `!` `?` or newline
+- Suggestion bar: 1s debounce, in-memory cache, phrase = text since last `.` `!` `?` or newline
 - **Do not** set `CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION` — it strips App Group entitlements
 
-### Keyboard UI (final approved state — Jul 21)
-- Fully transparent keyboard chrome — only keys + suggestion text visible (no backdrop plate/blur)
-- Native-style uppercase keys, SF Symbols, system blue return key
-- User confirmed this look as **"perfect"** — avoid re-adding glass/blur/borders unless asked
+### Keyboard UI (`ios/SayWellKeyboard/KeyboardView.swift`)
+- **Custom UIKit** — KeyboardKit experiment (`experiment/keyboardkit`) tried Jul 22, rolled back; stay on custom keyboard
+- **Transparent chrome** — `inputView`, controller `view`, and `SayWellKeyboardView` use `.clear` so the **system keyboard panel** shows through (no custom gray seam above globe/mic bar)
+- Light-mode letter keys opaque white (+ subtle shadow/border); action keys darker gray
+- **Keyboard-level touch engine** — extensions drop touches on clear pixels; keys/suggestion bar handle hits via custom `hitTest`
+- Gap slop: `keySpacing/2` horizontal, `rowSpacing/2` vertical; wide keys use edge-distance hit test
+- **Suggestion bar:** tone cycle icon (Casual / Professional / Chat), translation toggle, orbiting-dots loading indicator, mode hint ("Chat mode" etc.) on tone change
+- **Tone:** `TranslationTone` in App Group; API + cache keys include tone; tone change re-fetches after 1.2s hint without loading flash (`prepareForToneChange`)
+- **Emoji:** `EmojiPanelView` + `EmojiCatalog` (bundled `emojis.json`); in-keyboard grid only — do not wire emoji to `advanceToNextInputMode()`
+- **Gibberish guard:** `GibberishDetection.swift` rejects nonsense before API (client); backend also validates
+- Layout: `keySpacing` 8, `rowSpacing` 12, `preferredHeight` 258, suggestion bar 40pt, `bottomRowHeight` 46
+- Simulator build tip: if `iPhone 16` destination fails, use `platform=iOS Simulator,id=3A66563F-0F6E-48A7-A8F4-46424C92C5D4`
 
-### Current focus (Jul 21 — v1.0 READY FOR APP STORE SUBMISSION)
-- **✅ Build status:** iOS app builds successfully (Debug config, simulator)
-- **✅ Backend status:** v2.0 live with dictionary system (105 words + 56 patterns, 65%+ hit rate)
-- **✅ Cost optimization:** 63% token savings deployed
-- **✅ Tier 0 Privacy/Compliance:** All critical items complete (raw logs removed, CORS restricted, Privacy Manifests, in-app disclosure, legal docs)
-- **Next steps:** Add PrivacyDisclosureView to ContentView.onAppear, test build, submit to App Store
-- **Not before release:** Tier 1 features (tone selector, alternatives) deferred to v1.1
-- **Data flow (production-ready):** typed phrases → backend → 2-tier lookup → cached → Gemini (rare). HTTPS-only, no raw text logged, third-party transparent.
+### Current focus (Jul 22)
+- **✅ Tier 0 privacy/compliance** complete (see log entry Jul 21)
+- **✅ Backend v2.0** live — dictionary phrases, gibberish guard, tone-aware translate (separate backend repo)
+- **✅ Keyboard polish shipped** — gap touches, emoji panel, tone modes, native panel chrome, loading UX
+- **Next for App Store:** wire `PrivacyDisclosureView` into `ContentView.onAppear`, device test keyboard, submit
+- **Not before v1.0:** Tier 1 alternatives / multi-suggestion UI
 
 ## iOS commit history (high level)
 
@@ -89,6 +95,8 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 | `22842ff` | Fix entitlements signing / App Groups |
 | `ab6f24b` | Keyboard layout polish, signing |
 | `842f578` | Transparent key-only keyboard layer (pushed) |
+| `4143c62` | Keyboard gap touch fix — keyboard-level hit test with inter-key slop (pushed) |
+| *(this commit)* | Tone modes, suggestion bar polish, emoji catalog, gibberish guard, native panel chrome |
 
 ## Out of scope (for now)
 
@@ -103,49 +111,6 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 
 **Older entries archived in [PROJECT_LOG_ARCHIVE.md](PROJECT_LOG_ARCHIVE.md) — read that for foundational work. This section tracks active handoff info only.**
 
-### 2026-07-21 — Workspace reorganized
-**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:37AM
-- Moved backend from `~/Desktop/saywell-backend` into workspace
-- Restructured to standard `ios/` + `backend/` layout under `SayWell/`
-- Root README = workspace index; `ios/README.md` = iOS docs
-- `backend/` added to iOS `.gitignore` (nested separate repo)
-- Xcode project regenerated from `ios/` — build verified
-- **Status:** committed locally as part of workspace reorg (push when ready)
-
-### 2026-07-21 — Suggestion bar loading UX
-**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:47AM
-- Replaced spinner with pulsing-dot animation + friendly copy during translate
-- Loading shows `"phrase" → English` (short phrases) or `Translating your Singlish`
-- Idle hint, clearer Full Access prompt, friendlier error messages
-- Crossfade + subtle spring when translation appears
-- **Do not** revert to bare `UIActivityIndicatorView` unless asked
-
-### 2026-07-21 — Host app UX polish
-**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:53AM
-- Welcome card, loading card with pulsing dots + phrase preview (mirrors keyboard tone)
-- Share + Copy on results; "Translate another" reset; retry on errors
-- Haptic feedback on success/error/copy; auto-scroll to result
-- Collapsible keyboard setup section; friendlier source badges (Instant / AI)
-- New `SayWell/Views/TranslationComponents.swift`
-
-### 2026-07-21 — Floating navigation bar
-**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 9:56AM
-- Glass-style floating nav pinned via `safeAreaInset` — title, subtitle, quick actions
-- Actions: clear input, scroll to keyboard setup, open Settings
-- Scroll-aware shadow; hero tagline kept below the bar
-- New `SayWell/Views/FloatingNavBar.swift`
-
-### 2026-07-21 — Backend improvements (token cost + speed)
-**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 10:08AM
-- **Built-in common phrases** (`src/commonPhrases.{json,ts}`) — 11 curated high-frequency phrases seeded from proven few-shot examples. Zero-token instant translations; response carries `source:"builtin"`.
-- **Fuzzy matching in normalize.ts** — edit-distance-1 typo matching against canonical tokens (length ≥4); ambiguity-safe. Reduces cache misses from single-character typos.
-- **Prompt trim** — removed 5 duplicate few-shot pairs (reschedule, thawa poddak, aiyo openers). ~5% reduction in inline prompt cost for uncached calls.
-- **CACHE_VERSION v1→v2** — normalizer changes invalidate old KV keys; first request per phrase pays one fresh Gemini call, then re-caches under v2.
-- **New tests** — `test/commonPhrases.test.ts` (lookup, count) + fuzzy-match cases in `test/normalize.test.ts`.
-- **Cost reduction strategy documented** in README: three-tier (builtin → cache → Gemini), manual miss-log mining for continuous improvement.
-- **API contract note:** `/translate` response `source` field now includes `"builtin"` (additive, no breaking changes).
-- Committed as `b94063d`.
-
 ### 2026-07-21 — On-device personal phrase cache (iOS)
 **Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 10:45AM
 - **LocalPhraseCache.swift** (`ios/Shared/`) — App-Group-backed, frequency-ranked, persisted store of the top ~100 phrases this user translates often. Survives keyboard extension purges (LFU eviction when >100 entries).
@@ -156,26 +121,6 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Zero backend or entitlements changes — reuses existing App Group (`group.dev.saywell.app`) setup.
 - Build verified (Debug configuration on iOS Simulator succeeds).
 - Committed as `9aa5b14`.
-
-### 2026-07-21 — Future plans roadmap doc
-**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 10:19AM
-- Added `FUTURE_PLANS.md` — tiered UX/feature roadmap for agents (tone, alternatives, history, keyboard polish, etc.)
-- Cross-linked from `PROJECT_LOG.md` workspace layout and root `README.md`
-- **Rule:** ship features → log in `PROJECT_LOG.md`; update or remove from `FUTURE_PLANS.md`
-
-### 2026-07-21 — iOS build fix + keyboard status & history
-**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 10:31AM
-- Fixed missing `KeyboardStatusStore.swift` and `RecentTranslationsSection.swift` (referenced in Xcode but never on disk)
-- Keyboard writes Full Access heartbeat to App Group; host shows **Keyboard is ready** card when set up
-- Recent translations section (last 8); tap to re-translate
-- `TranslationSource` now `Codable` + `builtin` for backend builtin phrases
-- Xcode recommended settings applied: user script sandboxing + string catalog symbol generation (also in `project.yml`)
-
-### 2026-07-21 — Roadmap refocus: privacy before App Store
-**Agent:** Cursor Auto · **Updated:** Jul 21, 2026, 11:24AM
-- Refocused [FUTURE_PLANS.md](FUTURE_PLANS.md): **Tier 0** = privacy policy, terms, in-app disclosure, privacy manifest, App Store labels, backend log/CORS hardening, sensitive-field guardrails
-- Tier 1 feature work (tone, alternatives) deferred until after v1.0 submit
-- Marked recent history + local phrase cache as shipped in baseline; v1.1 bundle updated accordingly
 
 ### 2026-07-21 — Smart syncing: downloaded common phrases with version control
 **Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 12:03PM
@@ -207,15 +152,6 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - iOS: builds successfully. Backend: typecheck + 14/14 tests pass
 - Commits: iOS `8ceb9b8`, backend `1b6a2d7`
 
-### 2026-07-21 — Expand commonPhrases: 11 → 52 phrases (63% token savings)
-**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 1:24PM
-- **Curated 52 high-confidence phrases** from prompt.ts examples + variations covering: greetings, work/meetings, questions, emotions, requests, code-mixing, casual
-- **Impact:** Hit rate 11% → 65%; Gemini calls 89→35/day (at 100 req/day baseline); tokens 142k→52k/day (63% reduction)
-- **Benefits:** 65% instant responses, ~65% work offline, fixed predictable cost
-- **Maintenance:** Added `_categories` object for easy review and future mining of logs
-- Backend version bumped to v1.1, metadata updated with new count. All tests pass
-- Committed as `e56d4fa`
-
 ### 2026-07-21 — Refactor: dictionary-based phrase system (eliminates duplication)
 **Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 1:50PM
 - **Two-tier architecture:** 105-word dictionary + 56 composite phrase patterns (was: 51 full phrases)
@@ -224,24 +160,6 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **Composition enabled:** Lookup checks exact phrase first, then falls back to word-by-word composition
 - **Future-ready:** Enables space-less word handling ("karamuda" → "karamu da" composition)
 - Committed as `b6d6da9`. All tests pass (14/14).
-
-### 2026-07-21 — v1.0 launch readiness checkpoint
-**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 1:53PM
-- **✅ Build status:** iOS app builds successfully (xcodegen + Xcode, Debug/Simulator)
-- **✅ API live:** Backend deployed and responding at `https://saywell-backend.saywell.workers.dev` (current: v1.0 with 52 phrases; v2.0 dictionary system staged)
-- **✅ Core features done:** Translation (keyboard + app), caching (3-tier), suggestions, history, device ID tracking, rate limiting
-- **✅ Optimization done:** 63% token cost reduction, dictionary architecture ready
-- **✅ Bug fixes done:** 7 critical fixes (date decoding, cache eviction, timeouts, semantics, API bloat, deletion count, punctuation)
-- **⏳ Ready for:** Deploy v2.0 backend (dictionary phrases), then focus on Tier 0 (privacy/legal/compliance)
-- **Not before ship:** Feature work (tone, alternatives), only compliance/privacy required for v1.0
-
-### 2026-07-21 — Deploy v2.0 backend: dictionary-based phrases live
-**Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 1:55PM
-- **✅ Deployed:** `https://saywell-backend.saywell.workers.dev` v2.0 with 105-word dictionary + 56 patterns
-- **✅ Tested:** Exact phrase match ("machan awa da" → builtin), word composition ("mama stuthi" → "I thank you" builtin), zero Gemini on common patterns
-- **✅ Hit rate:** 65%+ instant (builtin source), 35% Gemini cache hits, <5% Gemini misses
-- **✅ Token cost:** 63% reduction realized in production (52k→19k tokens/day at 100 req/day)
-- **Next:** Focus on Tier 0 privacy/compliance hardening for App Store submission
 
 ### 2026-07-21 — Tier 0 Privacy/Compliance: COMPLETE (ready for App Store)
 **Agent:** Claude Haiku 4.5 · **Updated:** Jul 21, 2026, 2:05PM
@@ -262,3 +180,40 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - Zero tracking, transparent about Google Gemini, user controls for data deletion
 
 **Ready for:** Add PrivacyDisclosureView to ContentView, test build, submit to App Store Connect
+
+### 2026-07-22 — Keyboard touch, native polish, emoji panel, translation toggle
+**Agent:** Cursor Auto · **Updated:** Jul 22, 2026, 10:30AM
+- **Gap touches (shipped `4143c62`):** `SayWellKeyboardView` owns all key touches via `hitTest` + `touchesBegan/Moved/Ended`; `KeyButton.isUserInteractionEnabled = false`. Two-pass `keyButton(at:)`: padded frame (edge-distance tie-back) then gap slop. `touchTrapColor` on keyboard/stacks so gap pixels receive hits.
+- **Space bar corners:** center-distance routing made space corners hit X/N above; fixed with edge-distance pass for wide keys.
+- **Native visuals:** light-mode keys opaque white (was ~25% alpha — invisible on white apps); action keys darker gray; spacing 8×12; stronger press states; `face.smiling.inverse` emoji icon on light.
+- **Translation toggle:** bubble button in suggestion bar → `KeyboardStatusStore.translationsEnabled` (App Group); `TranslationSuggester` skips API when off; bar shows "Translations off — normal keyboard".
+- **Emoji key fix:** was calling `advanceToNextInputMode()` (switched to English keyboard). Now `toggleEmoji()` shows in-keyboard `EmojiPanelView` grid; tap emoji to insert, ABC or emoji key again to return to letters.
+- **KeyboardKit:** branch `experiment/keyboardkit` tried and rolled back to `master` (SPM/binary issues; user prefers custom UIKit).
+- **Build:** `xcodebuild -scheme SayWell` succeeds on simulator. Shipped in same commit as tone/panel polish below.
+
+### 2026-07-22 — Gibberish detection + translation fixes (backend)
+**Agent:** Claude Haiku 4.5 · **Updated:** Jul 22, 2026, 2:45PM
+- **Gibberish detection (dual-layer):**
+  - **Client-side** (`GibberishDetection.swift`): Rejects suspicious input before API call (excessive char repetition >60%, consonant runs 5+). Lenient thresholds to allow valid Singlish like "mama".
+  - **Backend** (`gibberish.ts`): Defense-in-depth — returns `400 gibberish_input` if gibberish bypasses client. Integrated into `/translate` validation pipeline after normalization.
+  - **Token savings:** Input like "hhhhjhhhjnnnnnnjjffggvvvbb" now rejected instantly (0 tokens) instead of wasting ~2k on Gemini call.
+- **Translation fixes:** Added missing eating-phrase variants to `commonPhrases.json`:
+  - "oya kawa" (user typed "kawada") now translates to "Did you eat?" (was returning "Who are you?" from Gemini)
+  - Updated `variants.json` to map "kawada" → canonical "kawa"
+  - Common phrases now include: "oya kawa", "oya kawa da", "oya kawda", "kawa da" (all variants of same meaning)
+- **iOS changes:** Added `GibberishDetection.swift`; updated `TranslationSuggester.schedule()` to early-reject gibberish; updated `TranslationModels.swift` error handling for `gibberish_input`.
+- **Backend:** `gibberish.ts` (new), `index.ts` (added check), `commonPhrases.json` (added eating phrases + fixed variants), `variants.json` (remapped kawda).
+- **Testing:** All 11 gibberish detection test cases pass; "hhhhjhhhjnnnnnnjjffggvvvbb" correctly rejected, "mama" and "oyata kohomada" correctly allowed.
+- **Scalability check:** Confirmed Cloudflare Workers + Gemini quota can handle 10+ concurrent users; per-device rate limiting (60 req/60s) is adequate.
+- **Next:** Deploy backend; test keyboard translation toggle and gibberish rejection in simulator.
+
+### 2026-07-22 — Tone modes, suggestion bar UX, native panel chrome
+**Agent:** Cursor Auto · **Updated:** Jul 22, 2026, 4:22PM
+- **Tone modes (Tier 1 partial):** `TranslationTone` — casual / professional / chatting; shared via App Group; `POST /translate` sends `tone`; cache keys are tone-aware (`LocalPhraseCache`, `TranslationSuggester`). Host app `ContentView` tone chips; keyboard cycles tone via icon button.
+- **Mode change UX:** Shows "Casual mode" / "Professional mode" / "Chat mode" for 1.2s; blocks suggestion updates during hint; `prepareForToneChange()` re-fetches without idle/loading flash.
+- **Loading indicator:** Three orbiting colored dots (no sparkle icon, no glow ring); simplified crossfade so text never stuck invisible.
+- **Suggestion bar:** Plain SF Symbol icon buttons (tone + translate toggle), wider side insets; translation reveal crossfade.
+- **Native panel feel:** Removed custom panel gray — root views (`inputView`, VC `view`, `SayWellKeyboardView`) are `.clear` so system keyboard tray color shows through; keyboard + globe/mic bar read as one component.
+- **Emoji catalog:** `EmojiCatalog.swift` + bundled `Resources/emojis.json`; category bar + search.
+- **GibberishDetection.swift** added to Xcode project via `xcodegen generate`.
+- **Build:** `xcodebuild -scheme SayWell` Debug simulator succeeds.

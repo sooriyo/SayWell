@@ -14,11 +14,15 @@ struct PhraseCacheEntry: Codable, Equatable {
 /// phrase is successfully served (network or cached), and evicting the lowest-count entry
 /// when the table exceeds 100 entries.
 enum LocalPhraseCache {
-    private static let key = "saywell.localPhraseCache.v1"
+    private static let key = "saywell.localPhraseCache.v2"
     private static let maxEntries = 100
 
     private static var defaults: UserDefaults {
         UserDefaults(suiteName: DeviceIDStore.appGroupID) ?? .standard
+    }
+
+    private static func cacheKey(phrase: String, tone: TranslationTone) -> String {
+        "\(tone.rawValue):\(phrase.lowercased())"
     }
 
     static func load() -> [PhraseCacheEntry] {
@@ -34,15 +38,19 @@ enum LocalPhraseCache {
     }
 
     /// Look up a phrase in the persisted cache. Returns nil if not found.
-    static func lookup(phrase: String) -> TranslationResponse? {
-        let key = phrase.lowercased()
+    static func lookup(phrase: String, tone: TranslationTone = KeyboardStatusStore.translationTone) -> TranslationResponse? {
+        let key = cacheKey(phrase: phrase, tone: tone)
         return load().first { $0.phrase == key }?.translation
     }
 
     /// Record a successful translation (network-sourced or cache-served). Increments hit count,
     /// updates lastUsedAt, and evicts the lowest-frequency entry if the cache exceeds 100 entries.
-    static func record(phrase: String, response: TranslationResponse) {
-        let key = phrase.lowercased()
+    static func record(
+        phrase: String,
+        response: TranslationResponse,
+        tone: TranslationTone = KeyboardStatusStore.translationTone
+    ) {
+        let key = cacheKey(phrase: phrase, tone: tone)
         var entries = load()
 
         if let idx = entries.firstIndex(where: { $0.phrase == key }) {

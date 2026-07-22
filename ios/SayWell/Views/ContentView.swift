@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var scrollTarget: String?
     @State private var keyboardIsReady = KeyboardStatusStore.isReady
     @State private var keyboardLastActive = KeyboardStatusStore.lastActiveAt
+    @State private var selectedTone = KeyboardStatusStore.translationTone
 
     var body: some View {
         ZStack {
@@ -23,6 +24,7 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 28) {
                         heroSection
                         inputSection
+                        toneSection
                         actionRow
                         resultSection
                             .id("result")
@@ -104,6 +106,7 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             refreshKeyboardStatus()
+            selectedTone = KeyboardStatusStore.translationTone
         }
     }
 
@@ -180,6 +183,56 @@ struct ContentView: View {
                     .font(.system(.caption2, design: .rounded))
                     .foregroundStyle(SayWellTheme.lagoon.opacity(0.45))
             }
+        }
+    }
+
+    private var toneSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Tone")
+                .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                .foregroundStyle(SayWellTheme.lagoon)
+
+            HStack(spacing: 8) {
+                ForEach(TranslationTone.allCases) { tone in
+                    Button {
+                        let shouldRetranslate = selectedTone != tone
+                            && viewModel.translation != nil
+                            && !viewModel.trimmedInput.isEmpty
+                        selectedTone = tone
+                        KeyboardStatusStore.translationTone = tone
+                        if shouldRetranslate {
+                            Task { await viewModel.translate() }
+                        }
+                    } label: {
+                        Label(tone.label, systemImage: tone.systemImage)
+                            .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 11)
+                            .foregroundStyle(selectedTone == tone ? SayWellTheme.ink : SayWellTheme.lagoon.opacity(0.8))
+                            .background(
+                                selectedTone == tone
+                                    ? SayWellTheme.brand.opacity(0.14)
+                                    : SayWellTheme.foam.opacity(0.9),
+                                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            )
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .strokeBorder(
+                                        selectedTone == tone
+                                            ? SayWellTheme.brand.opacity(0.45)
+                                            : SayWellTheme.lagoon.opacity(0.12),
+                                        lineWidth: selectedTone == tone ? 1.5 : 1
+                                    )
+                            }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedTone == tone ? .isSelected : [])
+                }
+            }
+
+            Text(selectedTone.description)
+                .font(.system(.caption, design: .rounded))
+                .foregroundStyle(SayWellTheme.lagoon.opacity(0.55))
         }
     }
 

@@ -20,10 +20,14 @@
 		4AE8FD04DCFD7BA1984FB696 /* TranslationHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */; };
 		4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
 		509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E61B148C08C617CA67F25744 /* KeyboardView.swift */; };
+		51616BAE3B1A57D6F2C43912 /* emojis.json in Resources */ = {isa = PBXBuildFile; fileRef = 3FA03D4692C941771052A085 /* emojis.json */; };
 		52DCC0187917352FBBB4E690 /* SayWellApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E475D773A141A4599D2F48D5 /* SayWellApp.swift */; };
+		5657FBF53CB4B4AF5970C693 /* GibberishDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD34FF31904D7726A30DA1E /* GibberishDetection.swift */; };
 		566723FDD40283BCFFDA58A4 /* LocalPhraseCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */; };
 		70759A9E1FAB3EC100B98B51 /* KeyboardStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */; };
+		76A3301C31A75288E5D2EF85 /* EmojiCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C016B239B26E8E7E94B51438 /* EmojiCatalog.swift */; };
 		79F8394F5C9913E21ED63525 /* RecentTranslationsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBCE2B830AA4BCCEAD89FFE /* RecentTranslationsSection.swift */; };
+		91AB25EB0DAF8431333C48F3 /* GibberishDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD34FF31904D7726A30DA1E /* GibberishDetection.swift */; };
 		9F5B9891A5829C55BDBB20DA /* KeyboardStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */; };
 		A57727E7C3891B132A1FDD9F /* DeviceIDStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */; };
 		B0E949716D22C0F859916A2A /* TranslationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */; };
@@ -68,6 +72,8 @@
 		1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationViewModel.swift; sourceTree = "<group>"; };
 		2A162156330BB6482195590D /* TranslationComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationComponents.swift; sourceTree = "<group>"; };
 		2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIDStore.swift; sourceTree = "<group>"; };
+		2CD34FF31904D7726A30DA1E /* GibberishDetection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GibberishDetection.swift; sourceTree = "<group>"; };
+		3FA03D4692C941771052A085 /* emojis.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
 		4293CB5C65E8B125AAA14FD3 /* PrivacyDisclosureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyDisclosureView.swift; sourceTree = "<group>"; };
 		584394D89FE942D7514ADF6E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonPhrasesStore.swift; sourceTree = "<group>"; };
@@ -80,6 +86,7 @@
 		9F9F1C1F35006D2F501CB4BC /* FloatingNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingNavBar.swift; sourceTree = "<group>"; };
 		AA1B698604D92F098295E3D8 /* SayWellTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellTheme.swift; sourceTree = "<group>"; };
 		B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardStatusStore.swift; sourceTree = "<group>"; };
+		C016B239B26E8E7E94B51438 /* EmojiCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCatalog.swift; sourceTree = "<group>"; };
 		C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPhraseCache.swift; sourceTree = "<group>"; };
 		D44E749D94B109273CB2F7A1 /* KeyboardSetupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupViews.swift; sourceTree = "<group>"; };
@@ -91,6 +98,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		01854D4B93BC17B92C9C18DF /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3FA03D4692C941771052A085 /* emojis.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		214DF92CF189275F95522245 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -107,10 +122,12 @@
 		262AD435CA5820754A33FA8D /* SayWellKeyboard */ = {
 			isa = PBXGroup;
 			children = (
+				C016B239B26E8E7E94B51438 /* EmojiCatalog.swift */,
 				E61B148C08C617CA67F25744 /* KeyboardView.swift */,
 				66042E156175D4B72AB125DD /* KeyboardViewController.swift */,
 				818AA3CC2D814D5E07324525 /* PrivacyInfo.xcprivacy */,
 				07F8D401C09948DC945AE574 /* TranslationSuggester.swift */,
+				01854D4B93BC17B92C9C18DF /* Resources */,
 			);
 			path = SayWellKeyboard;
 			sourceTree = "<group>";
@@ -137,6 +154,7 @@
 			children = (
 				62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */,
 				2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */,
+				2CD34FF31904D7726A30DA1E /* GibberishDetection.swift */,
 				B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */,
 				D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */,
 				F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */,
@@ -273,6 +291,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CBC5D2292317699F981ED52B /* PrivacyInfo.xcprivacy in Resources */,
+				51616BAE3B1A57D6F2C43912 /* emojis.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,6 +306,7 @@
 				EEFCE895C48909945C474993 /* ContentView.swift in Sources */,
 				0E08EF70668644FAE020260D /* DeviceIDStore.swift in Sources */,
 				1952CFF101FF8DB150F81E7E /* FloatingNavBar.swift in Sources */,
+				5657FBF53CB4B4AF5970C693 /* GibberishDetection.swift in Sources */,
 				F4FF2869F93C9D1B67B54120 /* KeyboardSetupViews.swift in Sources */,
 				70759A9E1FAB3EC100B98B51 /* KeyboardStatusStore.swift in Sources */,
 				C2E28C18C9CD8CA65150EFB8 /* LocalPhraseCache.swift in Sources */,
@@ -308,6 +328,8 @@
 			files = (
 				1C7B86A291A38EFAA18300CC /* CommonPhrasesStore.swift in Sources */,
 				A57727E7C3891B132A1FDD9F /* DeviceIDStore.swift in Sources */,
+				76A3301C31A75288E5D2EF85 /* EmojiCatalog.swift in Sources */,
+				91AB25EB0DAF8431333C48F3 /* GibberishDetection.swift in Sources */,
 				9F5B9891A5829C55BDBB20DA /* KeyboardStatusStore.swift in Sources */,
 				509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */,
 				153D9836CAC98CC0F8311E3C /* KeyboardViewController.swift in Sources */,

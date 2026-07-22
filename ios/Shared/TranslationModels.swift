@@ -1,7 +1,66 @@
 import Foundation
 
+enum TranslationTone: String, CaseIterable, Codable, Equatable, Identifiable {
+    case casual
+    case professional
+    case chatting
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .casual: return "Casual"
+        case .professional: return "Professional"
+        case .chatting: return "Chatting"
+        }
+    }
+
+    /// Short label for the keyboard suggestion bar.
+    var shortLabel: String {
+        switch self {
+        case .casual: return "Casual"
+        case .professional: return "Pro"
+        case .chatting: return "Chat"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .casual:
+            return "Natural everyday English"
+        case .professional:
+            return "Formal and polite for work"
+        case .chatting:
+            return "Short, text-message style"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .casual: return "text.bubble.fill"
+        case .professional: return "briefcase.fill"
+        case .chatting: return "message.fill"
+        }
+    }
+
+    var modeHint: String {
+        switch self {
+        case .casual: return "Casual mode"
+        case .professional: return "Professional mode"
+        case .chatting: return "Chat mode"
+        }
+    }
+
+    var next: TranslationTone {
+        let all = Self.allCases
+        guard let index = all.firstIndex(of: self) else { return .casual }
+        return all[(index + 1) % all.count]
+    }
+}
+
 struct TranslationRequest: Encodable {
     let text: String
+    let tone: String
 }
 
 struct TranslationResponse: Codable, Equatable {
@@ -33,6 +92,7 @@ struct APIErrorResponse: Decodable {
 enum SayWellError: LocalizedError {
     case emptyInput
     case inputTooLong
+    case gibberishInput
     case rateLimited(retryAfter: Int?)
     case translationFailed
     case upstreamTimeout
@@ -46,6 +106,8 @@ enum SayWellError: LocalizedError {
             return "Please enter some Singlish text to translate."
         case .inputTooLong:
             return "That text is too long. Try a shorter message."
+        case .gibberishInput:
+            return "That doesn't look like Singlish. Try typing a real word or phrase."
         case .rateLimited(let retryAfter):
             if let retryAfter {
                 return "Too many requests. Try again in \(retryAfter) seconds."
@@ -70,6 +132,8 @@ enum SayWellError: LocalizedError {
             return .emptyInput
         case "input_too_long":
             return .inputTooLong
+        case "gibberish_input":
+            return .gibberishInput
         case "rate_limited":
             let seconds = retryAfter.flatMap { Int($0) }
             return .rateLimited(retryAfter: seconds)

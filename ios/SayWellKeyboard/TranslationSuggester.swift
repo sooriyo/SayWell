@@ -8,11 +8,20 @@ final class TranslationSuggester {
     private var requestTask: Task<Void, Never>?
     private var lastRequested = ""
     private var memoryCache: [String: TranslationResponse] = [:]
+    private var skipNextLoadingState = false
 
     private let debounceNanoseconds: UInt64 = 1_000_000_000  // 1 second — wait until user pauses
     private let minChars = 2
 
     var onUpdate: ((SuggestionState) -> Void)?
+
+    private func cacheKey(phrase: String, tone: TranslationTone) -> String {
+        "\(tone.rawValue):\(phrase.lowercased())"
+    }
+
+    private var currentTone: TranslationTone {
+        KeyboardStatusStore.translationTone
+    }
 
     enum SuggestionState: Equatable {
         case idle
@@ -32,13 +41,28 @@ final class TranslationSuggester {
     func reset() {
         cancel()
         lastRequested = ""
+        skipNextLoadingState = false
         onUpdate?(.idle)
+    }
+
+    /// Tone changed — allow re-fetch without flashing idle/loading in the suggestion bar.
+    func prepareForToneChange() {
+        cancel()
+        lastRequested = ""
+        skipNextLoadingState = true
     }
 
     func schedule(phraseData: KeyboardPhrase, hasFullAccess: Bool) {
         let phrase = phraseData.text
         let charCount = phraseData.characterCount
         let trimmed = phrase.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard KeyboardStatusStore.translationsEnabled else {
+            cancel()
+            lastRequested = ""
+            onUpdate?(.idle)
+            return
+        }
 
         guard hasFullAccess else {
             cancel()
@@ -53,33 +77,43 @@ final class TranslationSuggester {
             return
         }
 
-        if let cached = memoryCache[trimmed.lowercased()] {
+        guard !GibberishDetection.isLikelyGibberish(trimmed) else {
+            cancel()
+            lastRequested = ""
+            onUpdate?(.idle)
+            return
+        }
+
+        let tone = currentTone
+        let cacheLookupKey = cacheKey(phrase: trimmed, tone: tone)
+
+        if let cached = memoryCache[cacheLookupKey] {
             lastRequested = trimmed
             onUpdate?(.ready(phrase: trimmed, charCount: charCount, translation: cached))
             return
         }
 
-        if let persisted = LocalPhraseCache.lookup(phrase: trimmed) {
+        if let persisted = LocalPhraseCache.lookup(phrase: trimmed, tone: tone) {
             let withSource = TranslationResponse(
                 translation: persisted.translation,
                 source: .persistedCache,
                 normalized: persisted.normalized
             )
-            memoryCache[trimmed.lowercased()] = withSource
-            LocalPhraseCache.record(phrase: trimmed, response: withSource)
+            memoryCache[cacheLookupKey] = withSource
+            LocalPhraseCache.record(phrase: trimmed, response: withSource, tone: tone)
             lastRequested = trimmed
             onUpdate?(.ready(phrase: trimmed, charCount: charCount, translation: withSource))
             return
         }
 
-        if let downloaded = CommonPhrasesStore.lookup(phrase: trimmed) {
+        if tone == .casual, let downloaded = CommonPhrasesStore.lookup(phrase: trimmed) {
             let response = TranslationResponse(
                 translation: downloaded,
                 source: .commonPhrases,
                 normalized: trimmed
             )
-            memoryCache[trimmed.lowercased()] = response
-            LocalPhraseCache.record(phrase: trimmed, response: response)
+            memoryCache[cacheLookupKey] = response
+            LocalPhraseCache.record(phrase: trimmed, response: response, tone: tone)
             lastRequested = trimmed
             onUpdate?(.ready(phrase: trimmed, charCount: charCount, translation: response))
             return
@@ -94,22 +128,28 @@ final class TranslationSuggester {
     }
 
     private func fetch(phrase: String, charCount: Int) async {
-        guard phrase != lastRequested || memoryCache[phrase.lowercased()] == nil else { return }
+        let tone = currentTone
+        let cacheLookupKey = cacheKey(phrase: phrase, tone: tone)
+        guard phrase != lastRequested || memoryCache[cacheLookupKey] == nil else { return }
 
         requestTask?.cancel()
-        onUpdate?(.loading(phrase: phrase, charCount: charCount))
+        let showLoading = !skipNextLoadingState
+        skipNextLoadingState = false
+        if showLoading {
+            onUpdate?(.loading(phrase: phrase, charCount: charCount))
+        }
 
         let task = Task {
             do {
-                let result = try await api.translate(text: phrase)
+                let result = try await api.translate(text: phrase, tone: tone)
                 guard !Task.isCancelled else { return }
-                memoryCache[phrase.lowercased()] = result
+                memoryCache[cacheLookupKey] = result
                 if memoryCache.count > 64 {
                     if let oldestKey = memoryCache.keys.first {
                         memoryCache.removeValue(forKey: oldestKey)
                     }
                 }
-                LocalPhraseCache.record(phrase: phrase, response: result)
+                LocalPhraseCache.record(phrase: phrase, response: result, tone: tone)
                 lastRequested = phrase
                 onUpdate?(.ready(phrase: phrase, charCount: charCount, translation: result))
             } catch is CancellationError {
