@@ -96,7 +96,7 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 | `ab6f24b` | Keyboard layout polish, signing |
 | `842f578` | Transparent key-only keyboard layer (pushed) |
 | `4143c62` | Keyboard gap touch fix — keyboard-level hit test with inter-key slop (pushed) |
-| *(this commit)* | Tone modes, suggestion bar polish, emoji catalog, gibberish guard, native panel chrome |
+| `4776bc4` | Tone modes, suggestion bar polish, emoji catalog, gibberish guard, native panel chrome |
 
 ## Out of scope (for now)
 
