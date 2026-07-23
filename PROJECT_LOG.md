@@ -114,6 +114,7 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 | `842f578` | Transparent key-only keyboard layer |
 | `4143c62` | Keyboard gap touch fix |
 | `4776bc4` | Tone modes, suggestion bar polish, emoji catalog, gibberish guard, native panel chrome |
+| `3526ca3` | Translation scheduling + panel color + gap-touch regression fixes |
 
 ## Out of scope (for now)
 
@@ -146,3 +147,4 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **Gap touches dead:** Same session — stale `cachedKeyTargets` + removed touch trap. Do **not** fix gaps with opaque fills; use touch engine + layout cache rebuild.
 - **Also:** `setReturnKeyTitle` guard — skip `rebuildKeys()` when title unchanged.
 - **If it regresses again:** see **Keyboard regressions — quick fix guide** in Key technical facts above.
+- Committed as `3526ca3`.
