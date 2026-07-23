@@ -14,8 +14,10 @@
 		1952CFF101FF8DB150F81E7E /* FloatingNavBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9F1C1F35006D2F501CB4BC /* FloatingNavBar.swift */; };
 		1AD1A2880C32CC551385F6A8 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
 		1C7B86A291A38EFAA18300CC /* CommonPhrasesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */; };
+		337C75A3D9AC4E1A8917F38E /* PhraseAliasStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968C1C82BBC68138B709FF1B /* PhraseAliasStore.swift */; };
 		3BD1A2F765BF0D34C39F6612 /* TranslationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */; };
 		474E93F9F1F0546C283A01B5 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
+		47A2DCD2D9A99F9943B41E5D /* PhraseAliasStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968C1C82BBC68138B709FF1B /* PhraseAliasStore.swift */; };
 		4982C877804C370F569D7D96 /* PrivacyDisclosureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4293CB5C65E8B125AAA14FD3 /* PrivacyDisclosureView.swift */; };
 		4AE8FD04DCFD7BA1984FB696 /* TranslationHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */; };
 		4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */; };
@@ -27,15 +29,18 @@
 		70759A9E1FAB3EC100B98B51 /* KeyboardStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */; };
 		76A3301C31A75288E5D2EF85 /* EmojiCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C016B239B26E8E7E94B51438 /* EmojiCatalog.swift */; };
 		79F8394F5C9913E21ED63525 /* RecentTranslationsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFBCE2B830AA4BCCEAD89FFE /* RecentTranslationsSection.swift */; };
+		8B1966D1D5B7FF3A9B71D5FD /* variants.json in Resources */ = {isa = PBXBuildFile; fileRef = 57E67E3FF5E1D53B3E5F3F06 /* variants.json */; };
 		91AB25EB0DAF8431333C48F3 /* GibberishDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD34FF31904D7726A30DA1E /* GibberishDetection.swift */; };
 		9F5B9891A5829C55BDBB20DA /* KeyboardStatusStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */; };
 		A57727E7C3891B132A1FDD9F /* DeviceIDStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8E83A4F2909F096A93F39A /* DeviceIDStore.swift */; };
+		AA81C74CB2A7CAFD8A166CE6 /* SinglishNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C96E3049033B1F57D47074 /* SinglishNormalizer.swift */; };
 		B0E949716D22C0F859916A2A /* TranslationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D56BA5D2BEEE4AECC969C4E /* TranslationViewModel.swift */; };
 		BECF1F022A368B77C272F376 /* TranslationComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A162156330BB6482195590D /* TranslationComponents.swift */; };
 		C2E28C18C9CD8CA65150EFB8 /* LocalPhraseCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */; };
 		C831D996570E4C0CF9CE6BC0 /* SayWellTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B698604D92F098295E3D8 /* SayWellTheme.swift */; };
 		CBC5D2292317699F981ED52B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 818AA3CC2D814D5E07324525 /* PrivacyInfo.xcprivacy */; };
 		CDBA4FCAF7F495A1FBAC1E18 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79D8AD5124A7F60AA47909E6 /* Assets.xcassets */; };
+		DD895F5971B19E65817E99D7 /* SinglishNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C96E3049033B1F57D47074 /* SinglishNormalizer.swift */; };
 		E4AF45D44FC15C5452DA2E9A /* TranslationSuggester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F8D401C09948DC945AE574 /* TranslationSuggester.swift */; };
 		E50E20E8BA898B2577C0596D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 584394D89FE942D7514ADF6E /* PrivacyInfo.xcprivacy */; };
 		EEFCE895C48909945C474993 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */; };
@@ -75,6 +80,7 @@
 		2CD34FF31904D7726A30DA1E /* GibberishDetection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GibberishDetection.swift; sourceTree = "<group>"; };
 		3FA03D4692C941771052A085 /* emojis.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = emojis.json; sourceTree = "<group>"; };
 		4293CB5C65E8B125AAA14FD3 /* PrivacyDisclosureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyDisclosureView.swift; sourceTree = "<group>"; };
+		57E67E3FF5E1D53B3E5F3F06 /* variants.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = variants.json; sourceTree = "<group>"; };
 		584394D89FE942D7514ADF6E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		62E1F47E4FB851D14740113B /* CommonPhrasesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonPhrasesStore.swift; sourceTree = "<group>"; };
 		66042E156175D4B72AB125DD /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
@@ -83,11 +89,13 @@
 		7FBC1841814C133F9DF5F101 /* SayWell.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SayWell.entitlements; sourceTree = "<group>"; };
 		818AA3CC2D814D5E07324525 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8ED249DB24B47FE057183F70 /* TranslationHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationHistoryStore.swift; sourceTree = "<group>"; };
+		968C1C82BBC68138B709FF1B /* PhraseAliasStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhraseAliasStore.swift; sourceTree = "<group>"; };
 		9F9F1C1F35006D2F501CB4BC /* FloatingNavBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingNavBar.swift; sourceTree = "<group>"; };
 		AA1B698604D92F098295E3D8 /* SayWellTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SayWellTheme.swift; sourceTree = "<group>"; };
 		B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardStatusStore.swift; sourceTree = "<group>"; };
 		C016B239B26E8E7E94B51438 /* EmojiCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCatalog.swift; sourceTree = "<group>"; };
 		C5E5D62DE7983AE6C55F9C4E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D1C96E3049033B1F57D47074 /* SinglishNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SinglishNormalizer.swift; sourceTree = "<group>"; };
 		D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPhraseCache.swift; sourceTree = "<group>"; };
 		D44E749D94B109273CB2F7A1 /* KeyboardSetupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupViews.swift; sourceTree = "<group>"; };
 		D5B62247EE53059B7815FDC9 /* SayWell.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SayWell.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -102,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				3FA03D4692C941771052A085 /* emojis.json */,
+				57E67E3FF5E1D53B3E5F3F06 /* variants.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -157,7 +166,9 @@
 				2CD34FF31904D7726A30DA1E /* GibberishDetection.swift */,
 				B28FE9DF20F4CD0D58C4840B /* KeyboardStatusStore.swift */,
 				D243D717CC99A1D70EA8292D /* LocalPhraseCache.swift */,
+				968C1C82BBC68138B709FF1B /* PhraseAliasStore.swift */,
 				F40FCACCA20B89BEE79190E4 /* SayWellAPI.swift */,
+				D1C96E3049033B1F57D47074 /* SinglishNormalizer.swift */,
 				77BF1C46C4D5176C1C5EC9B5 /* TranslationModels.swift */,
 			);
 			path = Shared;
@@ -292,6 +303,7 @@
 			files = (
 				CBC5D2292317699F981ED52B /* PrivacyInfo.xcprivacy in Resources */,
 				51616BAE3B1A57D6F2C43912 /* emojis.json in Resources */,
+				8B1966D1D5B7FF3A9B71D5FD /* variants.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -310,11 +322,13 @@
 				F4FF2869F93C9D1B67B54120 /* KeyboardSetupViews.swift in Sources */,
 				70759A9E1FAB3EC100B98B51 /* KeyboardStatusStore.swift in Sources */,
 				C2E28C18C9CD8CA65150EFB8 /* LocalPhraseCache.swift in Sources */,
+				337C75A3D9AC4E1A8917F38E /* PhraseAliasStore.swift in Sources */,
 				4982C877804C370F569D7D96 /* PrivacyDisclosureView.swift in Sources */,
 				79F8394F5C9913E21ED63525 /* RecentTranslationsSection.swift in Sources */,
 				4D245308AE8640F699CF53A8 /* SayWellAPI.swift in Sources */,
 				52DCC0187917352FBBB4E690 /* SayWellApp.swift in Sources */,
 				C831D996570E4C0CF9CE6BC0 /* SayWellTheme.swift in Sources */,
+				DD895F5971B19E65817E99D7 /* SinglishNormalizer.swift in Sources */,
 				BECF1F022A368B77C272F376 /* TranslationComponents.swift in Sources */,
 				4AE8FD04DCFD7BA1984FB696 /* TranslationHistoryStore.swift in Sources */,
 				3BD1A2F765BF0D34C39F6612 /* TranslationModels.swift in Sources */,
@@ -334,7 +348,9 @@
 				509BF7D70D9546DE87E0D927 /* KeyboardView.swift in Sources */,
 				153D9836CAC98CC0F8311E3C /* KeyboardViewController.swift in Sources */,
 				566723FDD40283BCFFDA58A4 /* LocalPhraseCache.swift in Sources */,
+				47A2DCD2D9A99F9943B41E5D /* PhraseAliasStore.swift in Sources */,
 				474E93F9F1F0546C283A01B5 /* SayWellAPI.swift in Sources */,
+				AA81C74CB2A7CAFD8A166CE6 /* SinglishNormalizer.swift in Sources */,
 				1AD1A2880C32CC551385F6A8 /* TranslationModels.swift in Sources */,
 				E4AF45D44FC15C5452DA2E9A /* TranslationSuggester.swift in Sources */,
 			);

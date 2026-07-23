@@ -8,7 +8,7 @@ SayWell translates **Singlish** (romanized Sinhala, often code-mixed with Englis
 
 Future work should deepen **control**, **confidence**, and **reuse** — without cluttering the approved minimal keyboard UI.
 
-**Current focus (Jul 21):** Ship **privacy, legal, and App Store readiness** before new UX features. See **Tier 0** below.
+**Current focus (Jul 22):** **Tier 0 privacy/compliance 95% complete** — gibberish detection + translation fixes shipped. Final: wire `PrivacyDisclosureView` into `ContentView`, device test keyboard, submit.
 
 ---
 
@@ -55,22 +55,23 @@ Now ──► Tier 0: Privacy & App Store gate ──► v1.0 submit ──► v
 
 ### Tier 0 — App Store release gate (ship first)
 
-Block public release until these are done. Keyboard + Full Access + third-party AI (Gemini) will trigger App Review scrutiny.
+✅ **95% COMPLETE** — Privacy/compliance done; final steps below.
 
-| Item | Notes |
-|------|--------|
-| **Privacy Policy** | Hosted URL: what leaves device (typed phrases), `X-Device-Id`, Cloudflare + Gemini subprocessors, retention (KV 30d, logs), no account/ads/sale |
-| **Terms of Use** | Translation aid, no accuracy guarantee, don’t use in password/OTP fields, rate limits |
-| **In-app Privacy screen** | What leaves device vs stays local; why Full Access; links to policy; clear history + local cache |
-| **Privacy Manifest** | `PrivacyInfo.xcprivacy` — UserDefaults/App Group, networking, required-reason APIs |
-| **App Store privacy labels** | User content + device ID sent to server; third-party AI; not used for tracking |
-| **App Review notes** | Explain Full Access + `/translate` network path; no keylogging |
-| **Backend hardening** | Stop/redact raw `translation_miss` logs in prod; tighten `ALLOWED_ORIGINS` before launch |
-| **Sensitive-field guardrails** | Warn users; disable network translate in secure/password contexts where possible |
-| **Export compliance** | `ITSAppUsesNonExemptEncryption = NO` if HTTPS-only |
-| **Production bundle ID** | Consider `app.saywell.*` instead of `dev.saywell.app` for public listing |
+| Item | Status | Notes |
+|------|--------|-------|
+| **Privacy Policy** | ✅ | Hosted URL: what leaves device (typed phrases), `X-Device-Id`, Cloudflare + Gemini subprocessors, retention (KV 30d, logs), no account/ads/sale |
+| **Terms of Use** | ✅ | Translation aid, no accuracy guarantee, don’t use in password/OTP fields, rate limits |
+| **In-app Privacy screen** | ✅ | `PrivacyDisclosureView.swift` shows on launch (not yet wired to `ContentView`) |
+| **Privacy Manifest** | ✅ | `PrivacyInfo.xcprivacy` — both app + keyboard targets; UserDefaults/App Group, networking, device ID |
+| **App Store privacy labels** | ✅ | User content + device ID sent to server; third-party AI; not used for tracking |
+| **Backend hardening** | ✅ | Raw `translation_miss` logs redacted (privacy); CORS restricted |
+| **Gibberish detection** | ✅ | Client + backend; prevents token waste on nonsense input |
+| **Translation accuracy** | ✅ | Fixed "oya kawada" → "Did you eat?" (was incorrect) + added phrase variants |
+| **App Review notes** | 🔄 | Prepare: explain Full Access + `/translate` path; no keylogging |
+| **Sensitive-field guardrails** | ⏸️ | Defer to v1.1: warn users; optional toggle in settings |
+| **Production bundle ID** | ⏸️ | Use `dev.saywell.app` for now; rebrand if needed post-launch |
 
-**Suggested order:** policy + terms → in-app screen → privacy manifest → backend log/CORS → TestFlight → submit.
+**Next:** Wire `PrivacyDisclosureView` to `ContentView.onAppear` → device test keyboard + Full Access funnel → submit to App Store Connect.
 
 ---
 

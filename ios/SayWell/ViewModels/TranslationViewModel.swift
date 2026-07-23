@@ -77,15 +77,16 @@ final class TranslationViewModel {
         }
 
         // Check the personal phrase cache first — if we have it, skip the network entirely.
-        let tone = KeyboardStatusStore.translationTone
-        if let cached = LocalPhraseCache.lookup(phrase: text, tone: tone) {
+        let tone = KeyboardStatusStore.snapshot.translationTone
+        let lookupPhrase = SinglishNormalizer.cacheKeyPhrase(for: text, tone: tone)
+
+        if let cached = LocalPhraseCache.lookup(phrase: text, tone: tone, normalized: lookupPhrase) {
             let withSource = TranslationResponse(
                 translation: cached.translation,
                 source: .persistedCache,
                 normalized: cached.normalized
             )
             translation = withSource
-            LocalPhraseCache.record(phrase: text, response: withSource, tone: tone)
             TranslationHistoryStore.record(singlish: text, response: withSource)
             reloadHistory()
             Haptics.notify(.success)
@@ -93,14 +94,15 @@ final class TranslationViewModel {
         }
 
         // Check the downloaded common phrases (offline!) — casual tone only.
-        if tone == .casual, let downloaded = CommonPhrasesStore.lookup(phrase: text) {
-            translation = TranslationResponse(
+        if tone == .casual, let downloaded = CommonPhrasesStore.lookup(phrase: lookupPhrase) {
+            let response = TranslationResponse(
                 translation: downloaded,
                 source: .commonPhrases,
-                normalized: text
+                normalized: lookupPhrase
             )
-            LocalPhraseCache.record(phrase: text, response: translation!, tone: tone)
-            TranslationHistoryStore.record(singlish: text, response: translation!)
+            translation = response
+            PhraseAliasStore.learn(typed: text, normalized: lookupPhrase, tone: tone)
+            TranslationHistoryStore.record(singlish: text, response: response)
             reloadHistory()
             Haptics.notify(.success)
             return
@@ -116,7 +118,7 @@ final class TranslationViewModel {
                 let result = try await api.translate(text: text, tone: tone)
                 guard !Task.isCancelled else { return }
                 translation = result
-                LocalPhraseCache.record(phrase: text, response: result, tone: tone)
+                LocalPhraseCache.record(phrase: text, response: result, tone: tone, writeThrough: true)
                 TranslationHistoryStore.record(singlish: text, response: result)
                 reloadHistory()
                 Haptics.notify(.success)

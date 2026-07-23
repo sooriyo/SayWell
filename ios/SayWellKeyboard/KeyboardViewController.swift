@@ -4,6 +4,7 @@ final class KeyboardViewController: UIInputViewController {
     private let suggester = TranslationSuggester()
     private var keyboardView: SayWellKeyboardView?
     private var heightConstraint: NSLayoutConstraint?
+    private var toneHintTask: Task<Void, Never>?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +24,11 @@ final class KeyboardViewController: UIInputViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        toneHintTask?.cancel()
+        toneHintTask = nil
         suggester.cancel()
+        LocalPhraseCache.flush()
+        PhraseAliasStore.flush()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -47,7 +52,6 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     private func setupKeyboard() {
-        print("🎹 [SETUP] Setting up keyboard")
         view.backgroundColor = .clear
         view.isOpaque = false
         view.clipsToBounds = false
@@ -60,7 +64,6 @@ final class KeyboardViewController: UIInputViewController {
         }
         view.addSubview(keyboard)
         keyboardView = keyboard
-        print("🎹 [SETUP] Keyboard view added: \(type(of: keyboard))")
 
         // Priority < required so the system can still negotiate with the host.
         let height = view.heightAnchor.constraint(equalToConstant: SayWellKeyboardView.preferredHeight)
@@ -155,8 +158,10 @@ extension KeyboardViewController: SayWellKeyboardViewDelegate {
     func keyboardViewDidChangeTone(_ view: SayWellKeyboardView) {
         view.syncSuggestionBarTone()
         suggester.prepareForToneChange()
-        Task { @MainActor in
+        toneHintTask?.cancel()
+        toneHintTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(1200))
+            guard !Task.isCancelled else { return }
             view.endToneModeHint()
             self.refreshSuggestion()
         }
@@ -167,19 +172,15 @@ extension KeyboardViewController: SayWellKeyboardViewDelegate {
         case .character(let value):
             if view.consumeCharacterForEmojiSearch(value) { break }
             textDocumentProxy.insertText(value)
-            refreshSuggestion()
         case .space:
             if view.consumeSpaceForEmojiSearch() { break }
             textDocumentProxy.insertText(" ")
-            refreshSuggestion()
         case .returnKey:
             textDocumentProxy.insertText("\n")
             suggester.reset()
-            refreshSuggestion()
         case .backspace:
             if view.consumeBackspaceForEmojiSearch() { break }
             textDocumentProxy.deleteBackward()
-            refreshSuggestion()
         case .shift:
             view.toggleShift()
         case .layoutToggle:

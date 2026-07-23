@@ -71,6 +71,18 @@ enum EmojiCatalog {
         bundledCategories.flatMap(\.emojis)
     }
 
+    /// Keyword → emoji characters for fast search.
+    private static let keywordIndex: [String: [String]] = {
+        var index: [String: Set<String>] = [:]
+        for entry in allEntries {
+            for keyword in entry.k {
+                let key = keyword.lowercased()
+                index[key, default: []].insert(entry.c)
+            }
+        }
+        return index.mapValues { Array($0) }
+    }()
+
     static var categories: [EmojiCategory] {
         let recentEntries = EmojiRecentStore.recents.map { EmojiEntry(c: $0, k: []) }
         let recentCategory = EmojiCategory(
@@ -93,16 +105,25 @@ enum EmojiCatalog {
         var seen = Set<String>()
         var results: [String] = []
 
-        for entry in allEntries {
-            guard !seen.contains(entry.c) else { continue }
-            let matches = entry.k.contains { keyword in
-                keyword.contains(trimmed) || trimmed.contains(keyword)
-            }
-            if matches {
-                seen.insert(entry.c)
-                results.append(entry.c)
+        for (keyword, emojis) in keywordIndex {
+            guard keyword.contains(trimmed) || trimmed.contains(keyword) else { continue }
+            for emoji in emojis where seen.insert(emoji).inserted {
+                results.append(emoji)
             }
         }
+
+        if results.isEmpty {
+            for entry in allEntries where !seen.contains(entry.c) {
+                let matches = entry.k.contains { keyword in
+                    keyword.contains(trimmed) || trimmed.contains(keyword)
+                }
+                if matches {
+                    seen.insert(entry.c)
+                    results.append(entry.c)
+                }
+            }
+        }
+
         return results
     }
 

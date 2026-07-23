@@ -6,12 +6,27 @@ struct CommonPhrasesMetadata: Codable {
     let lastUpdated: Date
 }
 
-/// Full common phrases bundle: metadata + phrases dictionary.
+/// Full common phrases bundle: metadata + phrases dictionary + spelling variants.
 struct CommonPhrasesBundle: Codable {
     let version: String
     let lastUpdated: Date
     let downloadedAt: Date
     let phrases: [String: String]
+    let variants: [String: [String]]?
+
+    init(
+        version: String,
+        lastUpdated: Date,
+        downloadedAt: Date,
+        phrases: [String: String],
+        variants: [String: [String]]? = nil
+    ) {
+        self.version = version
+        self.lastUpdated = lastUpdated
+        self.downloadedAt = downloadedAt
+        self.phrases = phrases
+        self.variants = variants
+    }
 }
 
 /// Smart syncing store for common phrases downloaded from the backend.
@@ -39,6 +54,20 @@ enum CommonPhrasesStore {
 
     // MARK: - Local Storage
 
+    private static var cachedPhrases: [String: String]?
+
+    private static func ensurePhrasesLoaded() {
+        guard cachedPhrases == nil else { return }
+        if let bundle = loadLocal() {
+            cachedPhrases = bundle.phrases
+            applySyncedData(phrases: bundle.phrases, variants: bundle.variants)
+        }
+    }
+
+    private static func invalidatePhraseCache() {
+        cachedPhrases = nil
+    }
+
     /// Load locally stored common phrases bundle (if any).
     static func loadLocal() -> CommonPhrasesBundle? {
         guard let data = defaults.data(forKey: bundleKey),
@@ -51,6 +80,15 @@ enum CommonPhrasesStore {
     private static func saveLocal(_ bundle: CommonPhrasesBundle) {
         guard let data = try? encoder.encode(bundle) else { return }
         defaults.set(data, forKey: bundleKey)
+        cachedPhrases = bundle.phrases
+        applySyncedData(phrases: bundle.phrases, variants: bundle.variants)
+    }
+
+    private static func applySyncedData(phrases: [String: String], variants: [String: [String]]?) {
+        if let variants {
+            SinglishNormalizer.applyVariants(variants)
+        }
+        SinglishNormalizer.rebuildVocabulary(fromPhraseKeys: Array(phrases.keys))
     }
 
     // MARK: - Metadata & Versioning
@@ -149,14 +187,16 @@ enum CommonPhrasesStore {
 
     /// Lookup a phrase in the locally-stored common phrases.
     static func lookup(phrase: String) -> String? {
+        ensurePhrasesLoaded()
+        let normalized = SinglishNormalizer.normalize(phrase)
         // Strip trailing punctuation (? ! .) that normalize() appends as separate tokens
         // so "bath kawa da ?" matches the stored phrase "bath kawa da"
-        let cleaned = phrase.lowercased()
+        let cleaned = normalized
             .replacingOccurrences(of: #"\s+[.!?]+\s*$"#, with: "", options: .regularExpression)
             .trimmingCharacters(in: .whitespaces)
 
-        let key = cleaned.isEmpty ? phrase.lowercased() : cleaned
-        return loadLocal()?.phrases[key]
+        let key = cleaned.isEmpty ? normalized : cleaned
+        return cachedPhrases?[key]
     }
 
     // MARK: - Management
@@ -166,6 +206,7 @@ enum CommonPhrasesStore {
         defaults.removeObject(forKey: bundleKey)
         defaults.removeObject(forKey: metadataKey)
         defaults.removeObject(forKey: lastCheckKey)
+        invalidatePhraseCache()
     }
 
     /// Size of locally-stored bundle in bytes (for diagnostics).
@@ -176,7 +217,8 @@ enum CommonPhrasesStore {
 
     /// Count of locally-stored phrases.
     static var phraseCount: Int {
-        loadLocal()?.phrases.count ?? 0
+        ensurePhrasesLoaded()
+        return cachedPhrases?.count ?? 0
     }
 
     /// Local version string (for UI display).

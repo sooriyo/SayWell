@@ -1,6 +1,11 @@
 import Foundation
 
 /// Shared keyboard setup heartbeat between the extension and host app (App Group).
+struct KeyboardSettingsSnapshot: Equatable {
+    let translationsEnabled: Bool
+    let translationTone: TranslationTone
+}
+
 enum KeyboardStatusStore {
     private static let lastActiveKey = "saywell.keyboard.lastActive"
     private static let hasFullAccessKey = "saywell.keyboard.hasFullAccess"
@@ -55,6 +60,14 @@ enum KeyboardStatusStore {
         set {
             defaults.set(newValue.rawValue, forKey: translationToneKey)
         }
+    }
+
+    /// Snapshot of keyboard settings — read once per suggestion refresh.
+    static var snapshot: KeyboardSettingsSnapshot {
+        KeyboardSettingsSnapshot(
+            translationsEnabled: translationsEnabled,
+            translationTone: translationTone
+        )
     }
 
     /// Called by `SayWellKeyboard` when the extension becomes visible.

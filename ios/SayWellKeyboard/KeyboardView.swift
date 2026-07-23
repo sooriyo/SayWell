@@ -38,6 +38,10 @@ final class SayWellKeyboardView: UIView {
     private let keyPreview = KeyPreviewView()
     private var shiftEnabled = false
     private var shiftLocked = false
+    private var letterKeyEntries: [(button: KeyButton, raw: String)] = []
+    private weak var shiftKeyButton: KeyButton?
+    private var cachedKeyTargets: [KeyHitTarget] = []
+    private var keyTargetsCacheValid = false
     private var layout: KeyboardLayout = .letters
     private var returnTitle = "return"
     private var showsGlobe = true
@@ -97,7 +101,6 @@ final class SayWellKeyboardView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        print("🎹 [INIT] SayWellKeyboardView initialized")
         // Transparent — system keyboard panel shows through for a native, attached look.
         backgroundColor = .clear
         isOpaque = false
@@ -198,6 +201,11 @@ final class SayWellKeyboardView: UIView {
         }
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        keyTargetsCacheValid = false
+    }
+
     /// Maps a touch to the best key target.
     ///
     /// Uses a two-pass strategy:
@@ -264,6 +272,10 @@ final class SayWellKeyboardView: UIView {
     }
 
     private func collectKeyButtons() -> [KeyHitTarget] {
+        if keyTargetsCacheValid {
+            return cachedKeyTargets
+        }
+
         var targets: [KeyHitTarget] = []
 
         func visit(_ view: UIView) {
@@ -282,6 +294,8 @@ final class SayWellKeyboardView: UIView {
         }
 
         visit(rowsStack)
+        cachedKeyTargets = targets
+        keyTargetsCacheValid = true
         return targets
     }
 
@@ -329,7 +343,11 @@ final class SayWellKeyboardView: UIView {
         } else {
             shiftEnabled = true
         }
-        rebuildKeys()
+        if usesLetterKeyLayout, !letterKeyEntries.isEmpty {
+            refreshLetterKeyTitles()
+        } else {
+            rebuildKeys()
+        }
     }
 
     func toggleEmoji() {
@@ -463,6 +481,9 @@ final class SayWellKeyboardView: UIView {
     private func rebuildKeys() {
         releaseActiveKey(commit: false)
         keyPreview.dismiss(animated: false)
+        letterKeyEntries.removeAll()
+        shiftKeyButton = nil
+        keyTargetsCacheValid = false
         rowsStack.arrangedSubviews.forEach {
             rowsStack.removeArrangedSubview($0)
             $0.removeFromSuperview()
@@ -560,6 +581,7 @@ final class SayWellKeyboardView: UIView {
                 self.delegate?.keyboardView(self, didTapKey: .character(insert))
                 self.consumeShiftAfterCharacter()
             }
+            letterKeyEntries.append((button, raw))
             letters.addArrangedSubview(button)
         }
 
@@ -593,6 +615,7 @@ final class SayWellKeyboardView: UIView {
                     self.delegate?.keyboardView(self, didTapKey: .shift)
                 }
                 shift.widthAnchor.constraint(equalToConstant: 42).isActive = true
+                shiftKeyButton = shift
                 row.addArrangedSubview(shift)
             } else {
                 switch layout {
@@ -774,7 +797,18 @@ final class SayWellKeyboardView: UIView {
     private func consumeShiftAfterCharacter() {
         guard usesLetterKeyLayout, shiftEnabled, !shiftLocked else { return }
         shiftEnabled = false
-        rebuildKeys()
+        refreshLetterKeyTitles()
+    }
+
+    private func refreshLetterKeyTitles() {
+        for entry in letterKeyEntries {
+            entry.button.setTitle(displayTitle(for: entry.raw), for: .normal)
+        }
+        if let shift = shiftKeyButton {
+            let symbol = shiftLocked ? "capslock.fill" : (shiftEnabled ? "shift.fill" : "shift")
+            shift.setSymbol(systemName: symbol, pointSize: 15)
+            shift.setActionHighlighted(shiftEnabled || shiftLocked)
+        }
     }
 
     private func flexibleSpacer(_ width: CGFloat) -> UIView {
@@ -931,6 +965,7 @@ private final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollec
     private var selectedCategoryID = "recent"
     private var searchQuery = ""
     private(set) var isSearchActive = false
+    private var searchDebounceTask: Task<Void, Never>?
 
     /// Sections shown in the horizontally-scrolling grid; cached to avoid re-reading defaults.
     private var sections: [EmojiCategory] = EmojiCatalog.displayCategories
@@ -1045,6 +1080,7 @@ private final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollec
     }
 
     func prepareForDisplay() {
+        searchDebounceTask?.cancel()
         isSearchActive = false
         searchQuery = ""
         searchResults = []
@@ -1107,6 +1143,7 @@ private final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollec
     }
 
     func endSearch() {
+        searchDebounceTask?.cancel()
         let wasActive = isSearchActive
         isSearchActive = false
         searchQuery = ""
@@ -1127,11 +1164,27 @@ private final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollec
     }
 
     private func syncSearchFromField() {
-        searchQuery = searchField.text ?? ""
-        searchResults = searchQuery.isEmpty ? [] : EmojiCatalog.search(searchQuery)
-        isSearchActive = true
-        collectionView.reloadData()
-        collectionView.setContentOffset(.zero, animated: false)
+        let query = searchField.text ?? ""
+        searchQuery = query
+        searchDebounceTask?.cancel()
+
+        guard !query.isEmpty else {
+            searchResults = []
+            collectionView.reloadData()
+            collectionView.setContentOffset(.zero, animated: false)
+            return
+        }
+
+        searchDebounceTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard !Task.isCancelled else { return }
+            let latest = self.searchField.text ?? ""
+            guard latest == query else { return }
+            self.searchResults = EmojiCatalog.search(latest)
+            self.isSearchActive = true
+            self.collectionView.reloadData()
+            self.collectionView.setContentOffset(.zero, animated: false)
+        }
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

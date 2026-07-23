@@ -3,6 +3,15 @@ import Foundation
 actor SayWellAPI {
     static let shared = SayWellAPI()
 
+    /// Keyboard extension session — fail fast when offline instead of waiting for connectivity.
+    static let keyboard: SayWellAPI = {
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = SayWellAPI.requestTimeout
+        config.timeoutIntervalForResource = SayWellAPI.requestTimeout
+        config.waitsForConnectivity = false
+        return SayWellAPI(session: URLSession(configuration: config))
+    }()
+
     /// Live Worker from README / deploy.
     static let productionBaseURL = URL(string: "https://saywell-backend.saywell.workers.dev")!
 
