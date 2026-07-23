@@ -76,15 +76,24 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 ### Keyboard UI (`ios/SayWellKeyboard/KeyboardView.swift`)
 - **Custom UIKit** — KeyboardKit experiment (`experiment/keyboardkit`) tried Jul 22, rolled back; stay on custom keyboard
 - **Transparent chrome** — `inputView`, controller `view`, and `SayWellKeyboardView` use `.clear` so the **system keyboard panel** shows through (no custom gray seam above globe/mic bar)
+- **Never use `touchTrapColor` / opaque fills on keyboard chrome** — causes visible panel tint mismatch in dark mode (see regressions below)
 - Light-mode letter keys opaque white (+ subtle shadow/border); action keys darker gray
-- **Keyboard-level touch engine** — extensions drop touches on clear pixels; keys/suggestion bar handle hits via custom `hitTest`
+- **Keyboard-level touch engine** — `point(inside:)` + `hitTest` returns `self` for `keyArea`; `touchesBegan` routes to `keyButton(at:)`; rebuild key-frame cache in `layoutSubviews`
 - Gap slop: `keySpacing/2` horizontal, `rowSpacing/2` vertical; wide keys use edge-distance hit test
+- **Suggestion refresh** — coalesced 20ms `refreshSuggestion()` after `insertText` (proxy text lags); also on `textDidChange`; do **not** remove `didTapKey` refresh
 - **Suggestion bar:** tone cycle icon (Casual / Professional / Chat), translation toggle, orbiting-dots loading indicator, mode hint ("Chat mode" etc.) on tone change; tone-hint `Task` cancelled on dismiss
 - **Tone:** `TranslationTone` in App Group; API + cache keys include tone; tone change re-fetches after 1.2s hint without loading flash (`prepareForToneChange`)
 - **Emoji:** `EmojiPanelView` + `EmojiCatalog` (bundled `emojis.json`); keyword index + 200ms search debounce; in-keyboard grid only — do not wire emoji to `advanceToNextInputMode()`
 - **Gibberish guard:** `GibberishDetection.swift` rejects nonsense before API (client); backend also validates
 - Layout: `keySpacing` 8, `rowSpacing` 12, `preferredHeight` 258, suggestion bar 40pt, `bottomRowHeight` 46
 - Simulator build tip: if `iPhone 16` destination fails, use `platform=iOS Simulator,id=3A66563F-0F6E-48A7-A8F4-46424C92C5D4`
+
+#### Keyboard regressions — quick fix guide
+| Symptom | Cause | Fix |
+|--------|--------|-----|
+| Translation never starts after pause; mode change “fixes” it | P0 removed `refreshSuggestion` from `didTapKey`; stale `documentContextBeforeInput`; `cancel()` killed debounce | Coalesced async `refreshSuggestion()` (~20ms); restore refresh on char/space/backspace; use `cancelDebounce()` not full `cancel()` on short-input guards; remove `lastRequested` early-return in `fetch()` |
+| Gray/black seam above/below keys | `touchTrapColor` or non-`.clear` on keyboard root/stacks | Revert all chrome to `.clear`; keep gap hits via `point(inside:)` + `hitTest` → `self` |
+| Gap taps dead between keys | Stale key-frame cache or missing touch engine | `rebuildKeyTargetCache()` in `layoutSubviews`; do **not** rely on `touchTrapColor` for color-matched panel |
 
 ### Current focus (Jul 23)
 - **✅ Tier 0 privacy/compliance** complete — see [archive](PROJECT_LOG_ARCHIVE.md#2026-07-21--tier-0-privacycompliance-complete-ready-for-app-store)
@@ -129,3 +138,11 @@ Two git repos, colocated locally. Do **not** commit `backend/` into the iOS repo
 - **Build/test:** iOS `xcodebuild` OK; backend 19/19 tests pass
 - **Deploy note:** push backend so iOS picks up bundle v1.2 on next phrase sync
 - **Not done:** Gemini context caching audit (skipped); Tier 3 (phrase mining, tone-decoupled cache, DiffableDataSource)
+
+### 2026-07-23 — Keyboard regression fixes (translation + panel + gaps)
+**Agent:** Cursor Auto · **Updated:** Jul 23, 2026, 11:01AM
+- **Translation not starting after pause:** P0 had dropped `refreshSuggestion()` from `didTapKey`; proxy text is stale on same call stack as `insertText`. Fixed: coalesced 20ms `refreshSuggestion()`; restored refresh on char/space/backspace; `cancelDebounce()` instead of full `cancel()` on guards; removed `lastRequested` block in `fetch()`; tone-hint queues `displayedState`.
+- **Panel color mismatch (dark mode seam):** Re-introduced `touchTrapColor` for gap touches tinted the panel vs system tray. Fixed: all chrome back to `.clear`; gaps via `point(inside:)` + `hitTest` → `self` + key-frame cache in `layoutSubviews`.
+- **Gap touches dead:** Same session — stale `cachedKeyTargets` + removed touch trap. Do **not** fix gaps with opaque fills; use touch engine + layout cache rebuild.
+- **Also:** `setReturnKeyTitle` guard — skip `rebuildKeys()` when title unchanged.
+- **If it regresses again:** see **Keyboard regressions — quick fix guide** in Key technical facts above.

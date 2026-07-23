@@ -26,6 +26,8 @@ final class KeyboardViewController: UIInputViewController {
         super.viewWillDisappear(animated)
         toneHintTask?.cancel()
         toneHintTask = nil
+        refreshTask?.cancel()
+        refreshTask = nil
         suggester.cancel()
         LocalPhraseCache.flush()
         PhraseAliasStore.flush()
@@ -96,11 +98,20 @@ final class KeyboardViewController: UIInputViewController {
         }
     }
 
+    /// Coalesce refreshes so `documentContextBeforeInput` is committed after `insertText`.
+    private var refreshTask: Task<Void, Never>?
+
     private func refreshSuggestion() {
-        let phraseData = KeyboardPhraseExtractor.currentPhrase(
-            beforeCursor: textDocumentProxy.documentContextBeforeInput
-        )
-        suggester.schedule(phraseData: phraseData, hasFullAccess: hasFullAccess)
+        refreshTask?.cancel()
+        refreshTask = Task { @MainActor [weak self] in
+            // One run-loop turn — avoids reading stale proxy text on the same call stack as insertText.
+            try? await Task.sleep(nanoseconds: 20_000_000)
+            guard !Task.isCancelled, let self else { return }
+            let phraseData = KeyboardPhraseExtractor.currentPhrase(
+                beforeCursor: self.textDocumentProxy.documentContextBeforeInput
+            )
+            self.suggester.schedule(phraseData: phraseData, hasFullAccess: self.hasFullAccess)
+        }
     }
 
     private func updateReturnKey() {
@@ -172,15 +183,18 @@ extension KeyboardViewController: SayWellKeyboardViewDelegate {
         case .character(let value):
             if view.consumeCharacterForEmojiSearch(value) { break }
             textDocumentProxy.insertText(value)
+            refreshSuggestion()
         case .space:
             if view.consumeSpaceForEmojiSearch() { break }
             textDocumentProxy.insertText(" ")
+            refreshSuggestion()
         case .returnKey:
             textDocumentProxy.insertText("\n")
             suggester.reset()
         case .backspace:
             if view.consumeBackspaceForEmojiSearch() { break }
             textDocumentProxy.deleteBackward()
+            refreshSuggestion()
         case .shift:
             view.toggleShift()
         case .layoutToggle:

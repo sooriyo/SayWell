@@ -36,6 +36,12 @@ final class TranslationSuggester {
         requestTask = nil
     }
 
+    /// Stop waiting for a pause; does not cancel an in-flight API request.
+    private func cancelDebounce() {
+        debounceTask?.cancel()
+        debounceTask = nil
+    }
+
     func reset() {
         cancel()
         lastRequested = ""
@@ -64,20 +70,24 @@ final class TranslationSuggester {
         }
 
         guard hasFullAccess else {
-            cancel()
+            cancelDebounce()
             onUpdate?(.needsFullAccess)
             return
         }
 
         guard trimmed.count >= minChars else {
-            cancel()
-            lastRequested = ""
-            onUpdate?(.idle)
+            cancelDebounce()
+            if trimmed.isEmpty {
+                requestTask?.cancel()
+                lastRequested = ""
+                onUpdate?(.idle)
+            }
             return
         }
 
         guard !GibberishDetection.isLikelyGibberish(trimmed) else {
-            cancel()
+            cancelDebounce()
+            requestTask?.cancel()
             lastRequested = ""
             onUpdate?(.idle)
             return
@@ -117,10 +127,17 @@ final class TranslationSuggester {
         }
 
         debounceTask?.cancel()
+        let phraseSnapshot = trimmed
+        let lookupSnapshot = lookupPhrase
         debounceTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: self?.debounceNanoseconds ?? 700_000_000)
             guard !Task.isCancelled else { return }
-            await self?.fetch(phrase: trimmed, lookupPhrase: lookupPhrase, charCount: charCount, tone: tone)
+            await self?.fetch(
+                phrase: phraseSnapshot,
+                lookupPhrase: lookupSnapshot,
+                charCount: charCount,
+                tone: tone
+            )
         }
     }
 
@@ -185,8 +202,12 @@ final class TranslationSuggester {
     }
 
     private func fetch(phrase: String, lookupPhrase: String, charCount: Int, tone: TranslationTone) async {
-        let lookupKey = cacheKey(phrase: lookupPhrase, tone: tone)
-        guard phrase != lastRequested || memoryCache[lookupKey] == nil else { return }
+        if let cached = memoryLookup(typed: phrase, lookupPhrase: lookupPhrase, tone: tone) {
+            skipNextLoadingState = false
+            lastRequested = phrase
+            onUpdate?(.ready(phrase: phrase, charCount: charCount, translation: cached))
+            return
+        }
 
         requestTask?.cancel()
         let showLoading = !skipNextLoadingState

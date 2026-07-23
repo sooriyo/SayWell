@@ -126,6 +126,17 @@ final class SayWellKeyboardView: UIView {
 
     var onPreferredHeightChange: (() -> Void)?
 
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        if keyArea.contains(point) { return true }
+        let suggestionPoint = convert(point, to: suggestionBar)
+        if suggestionBar.bounds.contains(suggestionPoint) { return true }
+        if layout == .emoji, !emojiPanel.isHidden {
+            let panelPoint = convert(point, to: emojiPanel)
+            if emojiPanel.bounds.contains(panelPoint) { return true }
+        }
+        return super.point(inside: point, with: event)
+    }
+
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard isUserInteractionEnabled, !isHidden, alpha > 0.01, bounds.contains(point) else {
             return nil
@@ -203,7 +214,30 @@ final class SayWellKeyboardView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        keyTargetsCacheValid = false
+        rebuildKeyTargetCache()
+    }
+
+    private func rebuildKeyTargetCache() {
+        var targets: [KeyHitTarget] = []
+
+        func visit(_ view: UIView) {
+            for subview in view.subviews {
+                if let button = subview as? KeyButton {
+                    targets.append(
+                        KeyHitTarget(
+                            button: button,
+                            frame: button.convert(button.bounds, to: self)
+                        )
+                    )
+                } else {
+                    visit(subview)
+                }
+            }
+        }
+
+        visit(rowsStack)
+        cachedKeyTargets = targets
+        keyTargetsCacheValid = true
     }
 
     /// Maps a touch to the best key target.
@@ -324,6 +358,7 @@ final class SayWellKeyboardView: UIView {
     }
 
     func setReturnKeyTitle(_ title: String) {
+        guard returnTitle != title else { return }
         returnTitle = title
         rebuildKeys()
     }
@@ -1569,6 +1604,7 @@ final class SuggestionBarView: UIView, UIGestureRecognizerDelegate {
 
     private func apply(_ state: TranslationSuggester.SuggestionState, animated: Bool) {
         if isShowingToneHint {
+            displayedState = state
             return
         }
 
@@ -1777,8 +1813,7 @@ final class SuggestionBarView: UIView, UIGestureRecognizerDelegate {
     func endToneModeHint() {
         guard isShowingToneHint else { return }
         isShowingToneHint = false
-        render(displayedState)
-        ensureContentVisible()
+        apply(displayedState, animated: false)
     }
 
     private func updateToneAppearance() {
